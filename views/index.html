@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div>
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment-with-locales.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.2/axios.min.js"></script>
+    <script>
+        // fr language
+        moment.locale('fr');
+
+        let startDate = moment().startOf('week'),
+            endDate = moment().endOf('week');
+
+        // Create an array to hold the names of the days
+        let dayNames = [];
+        let weekDates = [];
+
+        // Iterate from the start date to the end date
+        for (let date = startDate; date.isSameOrBefore(endDate); date.add(1, 'days')) {
+            // Get the name of the day and add it to the array
+            dayNames.push(date.format('dddd D'));
+            weekDates.push(date.format('YYYY-MM-DD'));
+        }
+
+        const ctx = document.getElementById('myChart');
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dayNames,
+                datasets: [
+                    {
+                        label: "Nombre d'entrées",
+                        data: [12, 19, 3, 5, 2, 3],
+                        borderWidth: 2,
+                        // borderColor: Utils.CHART_COLORS.red,
+                        fill: false,
+                        cubicInterpolationMode: 'monotone',
+                        tension: 0.4
+                    },
+                    {
+                        label: "Nombre de sortie",
+                        data: [2, 5, 3, 2, 1, 6],
+                        borderWidth: 2,
+                        // borderColor: Utils.CHART_COLORS.red,
+                        fill: false,
+                        cubicInterpolationMode: 'monotone',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Rapport entre les Entrées et les sorties cette semaine',
+                        font: {
+                            size: 15
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                        display: true,
+                        text: 'Jours',
+                        color: '#911',
+                        font: {
+                            family: 'Comic Sans MS',
+                            size: 16,
+                            weight: 'bold',
+                            lineHeight: 1.2,
+                        },
+                        padding: {top: 10, left: 0, right: 0, bottom: 0}
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Nombre',
+                            color: '#191',
+                            font: {
+                                family: 'Comic Sans MS',
+                                weight: 'bold',
+                                size: 16,
+                                style: 'normal',
+                                lineHeight: 1.2
+                            },
+                            padding: {top: 10, left: 0, right: 0, bottom: 10}
+                        }
+                    }
+            },
+                
+            }
+        });
+
+        axios.get('http://localhost:3000/api/product/stock/weekly-transactions')
+        .then((res) => {
+            const {ok, reports} = res.data;
+            if (ok) {
+                console.log(reports)
+                const data = weekDates.map(date => {
+                    const report = reports.find(rep => rep.date.startsWith(date));
+                    return {
+                        entries: report ? report.entries : NaN,
+                        exits: report ? report.exits : NaN
+                    }
+                });
+
+                console.log(data.map(d => d.entries))
+                console.log(data.map(d => d.exits))
+
+                chart.data.datasets[0].data = data.map(d => d.entries);
+                chart.data.datasets[1].data = data.map(d => d.exits);
+
+                chart.update()
+            }
+        })
+
+    </script>
+
+</body>
+
+</html>
