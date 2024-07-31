@@ -1,0 +1,513 @@
+<link href="https://kendo.cdn.telerik.com/themes/8.0.1/default/default-main.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2024.2.514/mjs/kendo.all.js" type="module"></script>
+<script src="https://kendo.cdn.telerik.com/2024.2.514/js/cultures/kendo.culture.fr-FR.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2024.2.514/js/messages/kendo.messages.fr-FR.min.js"></script>
+<!-- Include all Kendo UI modules. -->
+<script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
+<style>
+    #k-license-banner {
+        display: none !important;
+    }
+
+    .k-grid tr.k-alt {
+        background-color: inherit;
+    }
+    thead tr.k-table-row {
+        background-color: inherit !important;
+    }
+
+    div.k-pager.k-grid-pager.k-pager-md+div {
+        display: none !important;
+    }
+</style>
+<div id="example">
+
+    <div id="date-filters" style="margin-bottom: 12px;">
+        <center>
+            <label for="monthFilter">Mois: </label>
+            <input id="monthFilter" style="width: 160px;" />
+            <label for="yearFilter">Année: </label>
+            <input id="yearFilter" style="width: 100px;" />
+            <button id="applyFilters">Appliquer les filtres</button>
+        </center>
+    </div>
+
+    <div id="grid"></div>
+    <script>
+        $(document).ready(function () {
+
+            // set culture
+            kendo.culture('fr-FR');
+
+            // date now
+            const _date = new Date();
+
+            const years = Array.from({length: _date.getFullYear() - 2020}, (_, i) => 2021 + i).map(y => ({ text: y.toString(), value: y }));
+            
+            // Initialize Year Filter using ComboBox
+            const yearComboBox = $("#yearFilter").kendoComboBox({
+                dataTextField: "text",
+                dataValueField: "value",
+                dataSource: years,
+                index: 0,
+                suggest: true
+            }).data("kendoComboBox");
+            // set default value of year
+            yearComboBox.value(_date.getFullYear());
+
+
+            // Initialize Month Filter
+            // Initialize Month Filter using ComboBox
+            const months = [
+                { text: "Janvier", value: 0 },
+                { text: "Février", value: 1 },
+                { text: "Mars", value: 2 },
+                { text: "Avril", value: 3 },
+                { text: "Mai", value: 4 },
+                { text: "Juin", value: 5 },
+                { text: "Juillet", value: 6 },
+                { text: "Août", value: 7 },
+                { text: "Septembre", value: 8 },
+                { text: "Octobre", value: 9 },
+                { text: "Novembre", value: 10 },
+                { text: "Décembre", value: 11 }
+            ];
+
+
+            const monthComboBox = $("#monthFilter").kendoComboBox({
+                dataTextField: "text",
+                dataValueField: "value",
+                dataSource: months,
+                index: 0,
+                suggest: true
+            }).data("kendoComboBox");
+            monthComboBox.value(_date.getMonth())
+
+
+            $("#applyFilters").kendoButton({
+                icon: "filter",
+            });
+
+            // 
+            $("#applyFilters").on('click', () => {
+                let newUrl = `${crudServiceBaseUrl}/all?month=${+monthComboBox.value() + 1}&year=${yearComboBox.value()}`;
+                grid.dataSource.transport.options.read.url = newUrl;
+                grid.dataSource.read();
+            });
+
+
+            var crudServiceBaseUrl = "/api/product/actions";
+            
+            const dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: `${crudServiceBaseUrl}/all?month=${+monthComboBox.value() + 1}&year=${yearComboBox.value()}`,
+                        dataType: "json"
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options.models) {
+                            return { models: kendo.stringify(options.models) };
+                        }
+                    }
+                },
+                batch: true,
+                pageSize: 20,
+                autoSync: true,
+                aggregate: [{
+                    field: "totalQuantity",
+                    aggregate: "sum"
+                }],
+                group: {
+                    field: "product.name",
+                    dir: "desc",
+                    aggregates: [
+                        { field: "totalQuantity", aggregate: "sum" }
+                    ]
+                },
+                schema: {
+                    data: "data", // This points to the array of data within your response
+                    model: {
+                        id: "product._id",
+                        fields: {
+                            totalQuantity: { type: "number", editable: false },
+                            date: { type: "date", editable: false },
+                            "product.name": { type: "string", editable: false },
+                            remaining: { type: "number", editable: false },
+                            entries: { type: "number", editable: false },
+                            exits: { type: "number", editable: false },
+                            "product.category": { type: "string", editable: false },
+                            "product.quantityAvailable": { type: "number", editable: false },
+                            "transactions": { defaultValue: [] }
+                        }
+                    }
+                }
+            });
+
+            var grid = $("#grid").kendoGrid({
+                dataSource: dataSource,
+                columnMenu: {
+                    filterable: false
+                },
+                height: 680,
+                editable: "incell",
+                pageable: true,
+                sortable: true,
+                navigatable: true,
+                resizable: true,
+                reorderable: true,
+                groupable: true,
+                filterable: true,
+                dataBound: onDataBound,
+                detailTemplate: kendo.template($("#transaction-template").html()),
+                detailInit: detailInit,
+                toolbar: ["excel", "pdf", "search"],
+                pdfExport: function (e) {
+                    const width = e.sender.wrapper.width();
+                    e.sender.wrapperClone.width(width);
+                    e.sender.wrapperClone.addClass('k-clone');
+                },
+                columns: [{
+                    field: "date",
+                    title: "Date",
+                    format: "{0:dd/MM/yyyy}",
+                    width: 100
+                }, {
+                    field: "product.name",
+                    title: "Produit",
+                    template: "<div class='product-name'>#: product.name #</div>",
+                    width: 200
+                }, {
+                    field: "entries",
+                    title: "Entrées",
+                    width: 80,
+                    // aggregates: ["sum"],
+                    format: "{0:n0}"
+                }, {
+                    field: "exits",
+                    title: "Sorties",
+                    width: 80,
+                    // groupHeaderTemplate: "Category: #= data.value #, Total Quantity: #= aggregates.totalQuantity.sum #"
+                },{
+                    field: "remaining",
+                    title: "Restant",
+                    width: 80,
+                }]
+            }).data('kendoGrid');
+
+        });
+
+        
+        function onDataBound(e) {
+            var grid = this;
+            grid.table.find("tr").each(function () {
+                var dataItem = grid.dataItem(this);
+                var themeColor = dataItem.Discontinued ? 'success' : 'error';
+                var text = dataItem.Discontinued ? 'available' : 'not available';
+
+                $(this).find(".badgeTemplate").kendoBadge({
+                    themeColor: themeColor,
+                    text: text,
+                });
+
+                $(this).find(".rating").kendoRating({
+                    min: 1,
+                    max: 5,
+                    label: false,
+                    value: dataItem.CustomerRating,
+                    selection: "continuous"
+                });
+
+                $(this).find(".sparkline-chart").kendoSparkline({
+                    legend: {
+                        visible: false
+                    },
+                    data: [dataItem.TargetSales],
+                    type: "bar",
+                    chartArea: {
+                        margin: 0,
+                        width: 180,
+                        background: "transparent"
+                    },
+                    seriesDefaults: {
+                        labels: {
+                            visible: true,
+                            format: '{0}%',
+                            background: 'none'
+                        }
+                    },
+                    categoryAxis: {
+                        majorGridLines: {
+                            visible: false
+                        },
+                        majorTicks: {
+                            visible: false
+                        }
+                    },
+                    valueAxis: {
+                        type: "numeric",
+                        min: 0,
+                        max: 130,
+                        visible: false,
+                        labels: {
+                            visible: false
+                        },
+                        minorTicks: { visible: false },
+                        majorGridLines: { visible: false }
+                    },
+                    tooltip: {
+                        visible: false
+                    }
+                });
+
+                kendo.bind($(this), dataItem);
+            });
+        }
+
+        function onDataBound(e) {
+            var grid = this;
+            grid.table.find("tr").each(function () {
+                var dataItem = grid.dataItem(this);
+                var themeColor = dataItem.Discontinued ? 'success' : 'error';
+                var text = dataItem.Discontinued ? 'available' : 'not available';
+
+                $(this).find(".badgeTemplate").kendoBadge({
+                    themeColor: themeColor,
+                    text: text,
+                });
+
+                $(this).find(".rating").kendoRating({
+                    min: 1,
+                    max: 5,
+                    label: false,
+                    value: dataItem.CustomerRating,
+                    selection: "continuous"
+                });
+
+                $(this).find(".sparkline-chart").kendoSparkline({
+                    legend: {
+                        visible: false
+                    },
+                    data: [dataItem.TargetSales],
+                    type: "bar",
+                    chartArea: {
+                        margin: 0,
+                        width: 180,
+                        background: "transparent"
+                    },
+                    seriesDefaults: {
+                        labels: {
+                            visible: true,
+                            format: '{0}%',
+                            background: 'none'
+                        }
+                    },
+                    categoryAxis: {
+                        majorGridLines: {
+                            visible: false
+                        },
+                        majorTicks: {
+                            visible: false
+                        }
+                    },
+                    valueAxis: {
+                        type: "numeric",
+                        min: 0,
+                        max: 130,
+                        visible: false,
+                        labels: {
+                            visible: false
+                        },
+                        minorTicks: { visible: false },
+                        majorGridLines: { visible: false }
+                    },
+                    tooltip: {
+                        visible: false
+                    }
+                });
+
+                kendo.bind($(this), dataItem);
+            });
+        }
+
+        function returnFalse() {
+            return false;
+        }
+
+        function clientCategoryEditor(container, options) {
+            $('<input required name="Category">')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataTextField: "CategoryName",
+                    dataValueField: "CategoryID",
+                    dataSource: {
+                        data: categories
+                    }
+                });
+        }
+
+        function clientCountryEditor(container, options) {
+            $('<input required name="Country">')
+                .appendTo(container)
+                .kendoDropDownList({
+                    dataTextField: "CountryNameLong",
+                    dataValueField: "CountryNameShort",
+                    template: "<div class='dropdown-country-wrap'><img src='../content/web/country-flags/#:CountryNameShort#.png' alt='Kendo UI for jQuery Grid #: CountryNameLong# Flag' title='#: CountryNameLong#' width='30' /><span>#:CountryNameLong #</span></div>",
+                    dataSource: {
+                        transport: {
+                            read: {
+                                url: " https://demos.telerik.com/kendo-ui/service/countries",
+                                dataType: "jsonp"
+                            }
+                        }
+                    },
+                    autoWidth: true
+                });
+        }
+
+        var categories = [{
+            "CategoryID": 1,
+            "CategoryName": "Beverages"
+        }, {
+            "CategoryID": 2,
+            "CategoryName": "Condiments"
+        }, {
+            "CategoryID": 3,
+            "CategoryName": "Confections"
+        }, {
+            "CategoryID": 4,
+            "CategoryName": "Dairy Products"
+        }, {
+            "CategoryID": 5,
+            "CategoryName": "Grains/Cereals"
+        }, {
+            "CategoryID": 6,
+            "CategoryName": "Meat/Poultry"
+        }, {
+            "CategoryID": 7,
+            "CategoryName": "Produce"
+        }, {
+            "CategoryID": 8,
+            "CategoryName": "Seafood"
+        }];
+
+
+        // Define the detail template
+        $("body").append(``);
+
+    function detailInit(e) {
+        const detailRow = e.detailRow;
+
+        detailRow.find("#transactions-" + e.data.product._id).kendoGrid({
+            dataSource: {
+                data: e.data.transactions,
+                schema: {
+                    model: {
+                        fields: {
+                            _id: { type: "string" },
+                            type: { type: "string" },
+                            date: { type: "date" },
+                            quantity: { type: "number" },
+                            remaining: { type: "number" },
+                            product: { type: "string" }
+                        }
+                    }
+                }
+            },
+            scrollable: false,
+            sortable: true,
+            pageable: true,
+            columns: [
+                {
+                    field: "type",
+                    title: "Action",
+                    template(dataItem) {
+                        return dataItem.type === 'entry' ? 'Entrée' : 'Sortie';
+                    }
+                },
+                { field: "date", title: "Date", format: "{0:dd/MM/yyyy}" },
+                { field: "quantity", title: "Quantité" },
+                { field: "remaining", title: "Stock estant" }
+            ]
+        });
+    }
+    </script>
+
+    <style type="text/css">
+        .k-pdf-export .k-clone,
+        .k-pdf-export .k-loader-container {
+            display: none;
+        }
+
+        .customer-photo {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-size: 32px 35px;
+            background-position: center center;
+            vertical-align: middle;
+            line-height: 32px;
+            box-shadow: inset 0 0 1px #999, inset 0 0 10px rgba(0, 0, 0, .2);
+            margin-left: 5px;
+        }
+
+        .customer-name {
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 32px;
+            padding-left: 3px;
+        }
+
+        .k-grid tr .checkbox-align {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .product-photo {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-size: 32px 35px;
+            background-position: center center;
+            vertical-align: middle;
+            line-height: 32px;
+            box-shadow: inset 0 0 1px #999, inset 0 0 10px rgba(0, 0, 0, .2);
+            margin-right: 5px;
+        }
+
+        .product-name {
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 32px;
+            padding-left: 3px;
+        }
+
+        .k-rating-container .k-rating-item {
+            padding: 4px 0;
+        }
+
+        .k-rating-container .k-rating-item .k-icon {
+            font-size: 16px;
+        }
+
+        .dropdown-country-wrap {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .dropdown-country-wrap img {
+            margin-right: 10px;
+        }
+
+        #grid .k-grid-edit-row>td>.k-rating {
+            margin-left: 0;
+            width: 100%;
+        }
+    </style>
+    <script id="transaction-template" type="text/x-kendo-template"><div class="transaction-details"><h3>Transactions</h3><div id="transactions-#=product._id#"></div></div></script>
+</div>
