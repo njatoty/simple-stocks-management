@@ -679,6 +679,163 @@ async function fetchActionRecents(req, res) {
 
 }
 
+// get actions recent activities by product id
+async function fetchAllActions(req, res) {
+
+    const {year, month} = req.query;
+
+    try {
+        var filter = {};
+        if (month) filter = { month: +month }
+        if (year) filter = { ...filter, year: +year }
+    
+        const actions = await Action.aggregate([
+            {
+                $group: {
+                    _id: {
+                        date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+                        month: { $month: "$date" },
+                        year: { $year: "$date" },
+                        product: "$product"
+                    },
+                    entries: {
+                        $sum: {
+                            $cond: [{ $eq: ["$type", "entry"] }, "$quantity", 0]
+                        }
+                    },
+                    exits: {
+                        $sum: {
+                            $cond: [{ $eq: ["$type", "exit"] }, "$quantity", 0]
+                        }
+                    },
+                    transactions: { $push: "$$ROOT" },
+                    latestRemaining: { $last: "$remaining" }
+                }
+            },
+            {
+                $lookup: {
+                    from: "products", // The collection name for Product
+                    localField: "_id.product",
+                    foreignField: "_id",
+                    as: "productDetails"
+                }
+            },
+            {
+                $unwind: "$productDetails"
+            },
+            {
+                $project: {
+                    _id: 0,
+                    date: "$_id.date",
+                    product: { $mergeObjects: "$productDetails" },
+                    entries: 1,
+                    exits: 1,
+                    transactions: 1,
+                    month: "$_id.month",
+                    year: "$_id.year",
+                    remaining: "$latestRemaining"
+                }
+            },
+            {
+                $match: {
+                    ...filter
+                }
+            },
+            {
+                $sort: {
+                    date: 1,
+                    "product.name": 1
+                }
+            }
+        ]);
+    
+        res.json({
+            ok: true,
+            data: actions
+        });
+    
+    } catch(err) {
+        res.json({
+            ok: false,
+            data: []
+        });
+    }
+}
+
+// get daily transactions
+async function getProductDailyTransactions(req, res) {
+    try {
+        const { id } = req.params;
+
+        const filter = (id) ? {product: new mongoose.Types.ObjectId(id)} : {};
+
+        const transactions = await Action.aggregate([
+            {
+                $match: {
+                    ...filter
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        product: "$product",
+                        year: { $year: "$date" },
+                        month: { $month: "$date" },
+                        day: { $dayOfMonth: "$date" }
+                    },
+                    totalQuantity: { $sum: "$quantity" },
+                    transactions: { $push: "$$ROOT" }
+                }
+            },
+            {
+                $lookup: {
+                    from: "products", // The collection name for Product
+                    localField: "_id.product",
+                    foreignField: "_id",
+                    as: "productDetails"
+                }
+            },
+            {
+                $unwind: "$productDetails"
+            },
+            {
+                $project: {
+                    _id: 0,
+                    date: {
+                        $dateFromParts: {
+                            year: "$_id.year",
+                            month: "$_id.month",
+                            day: "$_id.day"
+                        }
+                    },
+                    product: { $mergeObjects: "$productDetails" },
+                    totalQuantity: 1,
+                    transactions: 1
+                }
+            },
+            {
+                $sort: {
+                    date: 1
+                }
+            }
+        ]);
+
+        console.log(transactions);
+
+        res.json({
+            ok: true,
+            data: transactions
+        });
+    } catch (error) {
+        console.error(error);
+
+        res.json({
+            ok: false,
+            message: 'error'
+        });
+    }
+}
+
 
 module.exports = {
     fetchProducts, createProduct, updateProduct, deleteProduct,
@@ -694,5 +851,8 @@ module.exports = {
     // GROUP
     fetchGroups, createGroup, updateGroup,
     // action recents
-    fetchActionRecents
+    fetchActionRecents,
+    // daily transactions
+    getProductDailyTransactions,
+    fetchAllActions
 };

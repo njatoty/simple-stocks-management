@@ -1,5 +1,5 @@
 const express = require('express');
-const { createProduct, updateProduct, deleteProduct, addExitProduct, addEntryProduct, fetchProducts, fetchProductById, cancelExitProduct, cancelEntryProduct, updateExitProduct, updateEntryProduct, filteredStocks, fetchWeeklyTransactions, fetchGroups, createGroup, updateGroup, fetchActionRecents } = require('../controllers/productApi');
+const { createProduct, updateProduct, deleteProduct, addExitProduct, addEntryProduct, fetchProducts, fetchProductById, cancelExitProduct, cancelEntryProduct, updateExitProduct, updateEntryProduct, filteredStocks, fetchWeeklyTransactions, fetchGroups, createGroup, updateGroup, fetchActionRecents, getProductDailyTransactions, fetchAllActions } = require('../controllers/productApi');
 const router = express.Router();
 
 // get products
@@ -25,6 +25,9 @@ router.route('/groups/all').get(fetchGroups).post(createGroup);
 router.route('/groups/update/:id').put(updateGroup);
 // Action recents
 router.route('/actions/recents/:id?').get(fetchActionRecents);
+// Daily transactions
+router.route('/actions/daily/:id?').get(getProductDailyTransactions);
+router.route('/actions/all').get(fetchAllActions);
 
 
 module.exports = router;

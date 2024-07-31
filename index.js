@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
+const expressLayouts = require('express-ejs-layouts');
 
 
 mongoose.connect(
@@ -20,6 +21,7 @@ mongoose.connect(
 });
 
 // Set the view engine to ejs
+app.use(expressLayouts)
 app.set('view engine', 'ejs');
 // allow security
 app.use(cors());
