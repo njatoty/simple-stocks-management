@@ -1,5 +1,5 @@
 const express = require('express');
-const { createProduct, updateProduct, deleteProduct, addExitProduct, addEntryProduct, fetchProducts, fetchProductById, cancelExitProduct, cancelEntryProduct, updateExitProduct, updateEntryProduct, filteredStocks, fetchWeeklyTransactions, fetchGroups, createGroup, updateGroup, fetchActionRecents, getProductDailyTransactions, fetchAllActions } = require('../controllers/productApi');
+const { createProduct, updateProduct, deleteProduct, fetchProducts, fetchProductById, cancelExitProduct, filteredStocks, fetchWeeklyTransactions, fetchGroups, createGroup, updateGroup, fetchActionRecents, getProductDailyTransactions, fetchAllActions, addActionProduct, updateActionProduct, cancelActionProduct } = require('../controllers/productApi');
 const router = express.Router();
 
 // get products
@@ -8,14 +8,10 @@ router.route('/').get(fetchProducts);
 router.route('/create').post(createProduct);
 // put and delete product
 router.route('/:id').get(fetchProductById).put(updateProduct).delete(deleteProduct);
-// add exit product
-router.route('/exit').post(addExitProduct);
-router.route('/exit/:id').put(updateExitProduct);
-router.route('/exit/cancel').post(cancelExitProduct);
-// add entry product
-router.route('/entry').post(addEntryProduct);
-router.route('/entry/:id').put(updateEntryProduct);
-router.route('/entry/cancel').post(cancelEntryProduct);
+// add action product
+router.route('/action').post(addActionProduct);
+router.route('/action/:id').put(updateActionProduct);
+router.route('/action/cancel').post(cancelActionProduct);
 // filtering
 router.route('/stock/filter').get(filteredStocks);
 // weekly transactions (entries and exits)

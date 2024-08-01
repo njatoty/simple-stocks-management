@@ -5,8 +5,12 @@ const groupSchema = new Schema({
     name: {
         type: String,
         required: true,
-        unique: true        
+        unique: true  
     },
+    date: {
+        type: Date,
+        default: Date.now
+    }
 }, {
     timestamps: true,
 });

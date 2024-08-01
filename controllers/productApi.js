@@ -44,10 +44,25 @@ async function fetchProductById(req, res) {
 async function createProduct(req, res) {
     console.log(req.body)
     try {
-        const created = await Product.create(req.body);
+        const product = await Product.create(req.body);
+
+        // if the quantity is more than 0
+        if (product.quantityAvailable > 0) {
+            // insert entry
+            await Action.create({
+                type: 'entry',
+                product: product._id,
+                // remaining quantity
+                remaining: product.quantityAvailable,
+                quantity: product.quantityAvailable,
+                date: product.date
+            });
+
+        }
+
         res.json({
             ok: true,
-            data: created
+            data: product
         });
     } catch (err) {
         console.log(err);
@@ -117,37 +132,42 @@ async function deleteProduct(req, res) {
 }
 
 /**
- * EXIT 
+ * ACTION 
  */
-// method to add exit product (POST)
-async function addExitProduct(req, res) {
+// method to do action (EXIT if quanity is negative. ENTRY if quantity is positive) product (POST)
+async function addActionProduct(req, res) {
     try {
 
-        const { productId, quantity, ...rest } = req.body;
+        var { productId, quantity, ...rest } = req.body;
 
+        // parse it quantity
+        quantity = parseInt(quantity);
+        // type d'action
+        let type = quantity > 0 ? 'entry' : 'exit';
         // select the product
         const product = await Product.findById(productId);
 
+        console.log(product.quantityAvailable + quantity)
         // there is product
-        if (product.quantityAvailable >= quantity) {
+        if (product.quantityAvailable + quantity >= 0) {
             // insert exit product
             const exitedProduct = await Action.create({
-                type: 'exit',
+                type: type,
                 product: productId,
-                quantity: quantity,
+                quantity: Math.abs(quantity), // always positive number
                 // remaining quantity
-                remaining: product.quantityAvailable - quantity,
+                remaining: product.quantityAvailable + quantity,
                 ...rest
             });
 
             // decrease available product quantity
             const editedProduct = await Product.findByIdAndUpdate(productId, {
-                quantityAvailable: product.quantityAvailable - exitedProduct.quantity
+                quantityAvailable: product.quantityAvailable + quantity
             }, { new: true });
     
             res.json({
                 ok: true,
-                exited: exitedProduct,
+                action: exitedProduct,
                 product: editedProduct
             });
             
@@ -155,7 +175,7 @@ async function addExitProduct(req, res) {
             
             res.json({
                 ok: false,
-                message: `Aucun produit (${product.name}) disponible.`
+                message: `Il n'y a plus de ${product.name} disponible.`
             });
         }
 
@@ -169,27 +189,30 @@ async function addExitProduct(req, res) {
 }
 
 // method to cancel exit (POST)
-async function cancelExitProduct(req, res) {
+async function cancelActionProduct(req, res) {
     try {
 
-        const { exitId } = req.body;
+        const { actionId } = req.body;
 
         // find exit and get product
-        const exit = await Action.findById(exitId).populate('product');
+        const action = await Action.findById(actionId).populate('product');
         // select the product
-        const product = exit.product;
+        const product = action.product;
+
+        // quantity to adjust
+        const quantity = action.type === 'entry' ? -action.quantity : action.quantity
 
         // update product (restore quantity)
         const updatedProduct = await Product.findByIdAndUpdate(product._id, {
-            quantityAvailable: product.quantityAvailable + exit.quantity
+            quantityAvailable: product.quantityAvailable + quantity
         }, { new: true });
 
-        // delete exit
-        const deleteExit = await Action.findByIdAndDelete(exit._id);
+        // delete action
+        const deletedAction = await Action.findByIdAndDelete(action._id);
 
         res.json({
             ok: true,
-            canceled: deleteExit,
+            canceled: deletedAction,
             product: updatedProduct
         });
 
@@ -202,185 +225,23 @@ async function cancelExitProduct(req, res) {
     }
 }
 
-async function updateExitProduct(req, res) {
+// method to update Action (PUT)
+async function updateActionProduct(req, res) {
     try {
 
-        /**
-            exit = 1
-            newExit = 2
-            product = 16
-            qty = product + entry - newEntry
-        **/
-        // id of the exit
+        // id of the action
         const { id } = req.params;
         const { quantity } = req.body;
 
         // si la quantité est négative
-        if (quantity < 0) {
-            return res.json({
-                ok: false,
-                message: "La valeur de la quantité ne doit pas être négative."
-            })
-        }
-
-        // get current exit
-        const exit = await Action.findById(id).populate('product');
-
-        // if exit is not found
-        if (!exit) {
-            return res.json({
-                ok: false,
-                message: "Aucune sortie trouvée"
-            });
-        }
-
-        // check available quantity if (calcul result is a negative number)
-        if (exit.product.quantityAvailable + exit.quantity - quantity < 0) {
-            return res.json({
-                ok: false,
-                message: `La nouvelle quantité a dépassé celle du produit (disponible: ${exit.product.quantityAvailable}, sortie: ${exit.quantity})`
-            });
-        }
-
-        // to get product quantity (remain + quantity)
-        let productQty = exit.remain + exit.quantity;
+        const newType = (quantity < 0) ? 'exit' : 'entry';
+        quantity = (quantity < 0) ? -quantity : quantity;
         
-        // update exit
-        const updatedExit = await Action.findByIdAndUpdate(id, {
-            remaining: productQty - quantity,
-            ...req.body
-        }, { new: true });
+        // get current action
+        const action = await Action.findById(id).populate('product');
 
-        // update also product (change available quantity)
-        const updatedProduct = await Product.findByIdAndUpdate(exit.product._id, {
-            quantityAvailable: exit.product.quantityAvailable + exit.quantity - updatedExit.quantity
-        }, { new: true });
-
-
-        res.json({
-            ok: true,
-            exit: updatedExit,
-            product: updatedProduct
-        });
-
-        
-    } catch (error) {
-        console.log(error);
-        res.json({
-            ok: false,
-            message: "Error"
-        });
-    }
-}
-
-
-/**
- * ENTRY 
- */
-// method to add entry product (POST)
-async function addEntryProduct(req, res) {
-    try {
-
-        const { productId, quantity, ...rest } = req.body;
-
-        // select the product
-        const product = await Product.findById(productId);
-
-        // insert exit product
-        const enteredProduct = await Action.create({
-            type: 'entry',
-            product: productId,
-            // remaining quantity
-            remaining: product.quantityAvailable + quantity,
-            quantity: quantity,
-            ...rest
-        });
-
-        // decrease available product quantity
-        const editedProduct = await Product.findByIdAndUpdate(productId, {
-            quantityAvailable: product.quantityAvailable + enteredProduct.quantity
-        }, { new: true });
-
-        res.json({
-            ok: true,
-            entered: enteredProduct,
-            product: editedProduct
-        });
-        
-    } catch (error) {
-        console.log(error);
-        res.json({
-            ok: false,
-            message: "Error"
-        });
-    }
-}
-
-// method to cancel entry (POST)
-async function cancelEntryProduct(req, res) {
-    try {
-
-        const { entryId } = req.body;
-
-        // find entry and get product
-        const entry = await Action.findById(entryId).populate('product');
-
-        if (entry) {
-
-            // select the product
-            const product = entry.product;
-
-            // update product (restore quantity)
-            const updatedProduct = await Product.findByIdAndUpdate(product._id, {
-                quantityAvailable: product.quantityAvailable - entry.quantity
-            }, { new: true });
-
-            // delete entry
-            const deletedEntry = await Action.findByIdAndDelete(entry._id);
-
-            res.json({
-                ok: true,
-                canceled: deletedEntry,
-                product: updatedProduct
-            });
-        } else {
-            res.json({
-                ok: false,
-                message: `Entry with _id: ${entryId} not found!`
-            });
-        }
-
-    } catch (error) {
-        console.log(error);
-        res.json({
-            ok: false,
-            message: "Error"
-        });
-    }
-}
-
-
-// method to update entry (PUT)
-async function updateEntryProduct(req, res) {
-    try {
-
-        // id of the entry
-        const { id } = req.params;
-        const { quantity } = req.body;
-
-        // si la quantité est négative
-        if (quantity < 0) {
-            return res.json({
-                ok: false,
-                message: "La valeur de la quantité ne doit pas être négative."
-            })
-        }
-        
-        // get current entry
-        const entry = await Action.findById(id).populate('product');
-
-        // if entry is null
-        if (!entry) {
+        // if action is null
+        if (!action) {
             
             return res.json({
                 ok: false,
@@ -389,14 +250,15 @@ async function updateEntryProduct(req, res) {
         }
 
         
-        // update entry
-        const updatedEntry = await Action.findByIdAndUpdate(id, {
-            ...req.body
+        // update action
+        const updatedAction = await Action.findByIdAndUpdate(id, {
+            type: newType,
+            quantity: quantity
         }, { new: true });
 
         // update also product (change available quantity)
-        const updatedProduct = await Product.findByIdAndUpdate(entry.product._id, {
-            quantityAvailable: entry.product.quantityAvailable - entry.quantity + updatedEntry.quantity
+        const updatedProduct = await Product.findByIdAndUpdate(action.product._id, {
+            quantityAvailable: action.product.quantityAvailable - action.quantity + updatedAction.quantity
         }, { new: true });
 
         /**
@@ -408,7 +270,7 @@ async function updateEntryProduct(req, res) {
 
         res.json({
             ok: true,
-            entry: updatedEntry,
+            action: updatedAction,
             product: updatedProduct
         });
 
@@ -597,9 +459,10 @@ async function fetchGroups(req, res) {
 
 // method to create a new group (POST)
 async function createGroup(req, res) {
-    console.log('not')
     try {
-        const created = await Group.create(req.body);
+        const created = await Group.create({
+            name: req.body.name
+        });
         res.json({
             ok: true,
             data: created
@@ -686,7 +549,7 @@ async function fetchAllActions(req, res) {
 
     try {
         var filter = {};
-        if (month) filter = { month: +month }
+        if (month && month !== '0') filter = { month: +month }
         if (year) filter = { ...filter, year: +year }
     
         const actions = await Action.aggregate([
@@ -839,11 +702,11 @@ async function getProductDailyTransactions(req, res) {
 
 module.exports = {
     fetchProducts, createProduct, updateProduct, deleteProduct,
-    addEntryProduct, addExitProduct, fetchProductById,
+    addActionProduct, fetchProductById,
     // cancel
-    cancelExitProduct, cancelEntryProduct,
+    cancelActionProduct,
     // udpate (:id)
-    updateEntryProduct, updateExitProduct,
+    updateActionProduct,
     // filtered by month and year
     filteredStocks,
     // weekly trasactions
