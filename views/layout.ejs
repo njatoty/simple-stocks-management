@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://bootswatch.com/5/lumen/bootstrap.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/lumen/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <title><%= typeof title !== 'undefined' ? title : 'Inventaire des stocks' %></title>
     <style>
         a.nav-link {
@@ -67,7 +68,7 @@
             color: #cc554d !important;
         }
 
-        .action-form, #add-product-form {
+        .action-form, #add-product-form, #add-group-form {
             background: #dbe9fc;
             padding: 1rem;
         }
@@ -143,7 +144,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment-with-locales.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.2/axios.min.js"></script>
     <script src="https://bootswatch.com/_vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             let url = window.location.href;
@@ -151,7 +152,44 @@
                 if (url.endsWith($(a).attr('href')))
                     $(a).addClass('active')
             });
-        })
+        });
+
+        function Alert(message) {
+            
+            Toastify({
+                text: message,
+                duration: 8000,
+                // destination: "https://github.com/apvarun/toastify-js",
+                // newWindow: true,
+                close: true,
+                gravity: "top", // `top` or `bottom`
+                position: "right", // `left`, `center` or `right`
+                stopOnFocus: true, // Prevents dismissing of toast on hover
+                style: {
+                    background: "linear-gradient(to right, #00b09b, #96c93d)",
+                },
+                onClick: function(){} // Callback after click
+            }).showToast();
+        }
+
+        
+        function Error(message) {
+            
+            Toastify({
+                text: message,
+                duration: 8000,
+                // destination: "https://github.com/apvarun/toastify-js",
+                // newWindow: true,
+                close: true,
+                gravity: "top", // `top` or `bottom`
+                position: "right", // `left`, `center` or `right`
+                stopOnFocus: true, // Prevents dismissing of toast on hover
+                style: {
+                    background: "linear-gradient(to right, #ff0000, #ff7f7f)",
+                },
+                onClick: function(){} // Callback after click
+            }).showToast();
+        }
     </script>
 </body>
 

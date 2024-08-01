@@ -77,7 +77,7 @@
                                     <div class="col-md-6">
                                         <div>
                                             <label for="group" class="form-label mt-4">Nom du groupe</label>
-                                            <input class="form-control" type="text" name="group" id="group" required>
+                                            <input class="form-control" type="text" name="name" id="group" required>
                                         </div>
                                     </div>
                                 </div>
@@ -126,7 +126,7 @@
             columnDefs: [
                 {
                     targets: [4],
-                    render: DataTable.render.datetime('DD-MM-YYYY'),
+                    render: DataTable.render.datetime('DD/MM/YYYY'),
                     className: 'dt-body-left dt-head-left',
                     createdCell: function (td, cellData, rowData, row, col) {
                         // Adding a data attribute to the cell
@@ -135,17 +135,6 @@
                         $(td).attr('td-name', 'date');
                     }
                 },
-                // {
-                //     targets: [5],
-                //     render: DataTable.render.datetime('DD-MM-YYYY, HH:MM'),
-                //     className: 'dt-body-left dt-head-left',
-                //     createdCell: function (td, cellData, rowData, row, col) {
-                //         // Adding a data attribute to the cell
-                //         $(td).attr('type', 'date');
-                //         $(td).attr('isReadOnly', 'true');
-                //         $(td).attr('date-value', cellData.split('T')[0]);
-                //     }
-                // },
                 {
                     targets: 3,
                     className: 'dt-body-center dt-head-center',
@@ -225,7 +214,8 @@
                 var name = $cell.attr('td-name');
                 var readOnly = $cell.attr('isReadOnly') === 'true' ? true : false;
                 if (type === 'date') text = $cell.attr('date-value');
-                $cell.html(`<input name="${name}" type="${type}" class="form-control" value="${text}" ${readOnly ? "readOnly" : ""} />`);
+                if (['name', 'description'].includes(name))
+                    $cell.html(`<input name="${name}" type="${type}" class="form-control" value="${text}" ${readOnly ? "readOnly" : ""} />`);
             });
             $row.addClass('as-form');
         }
@@ -246,7 +236,7 @@
                 ...dataObj
             });
 
-            const {ok, data} = res.data;
+            const {ok, data, message} = res.data;
 
             console.log(res.data)
 
@@ -255,6 +245,9 @@
                 const row = table.row($tr);
                 row.data(data).draw();
                 $tr.removeClass('as-form');
+                Alert('Un produit a été modifié.');
+            } else {
+                Error(message)
             }
 
         }
@@ -345,7 +338,7 @@
                         },
                         {
                             targets: 1,
-                            render: DataTable.render.datetime('DD-MM-YYYY'),
+                            render: DataTable.render.datetime('DD/MM/YYYY'),
                         },
                         {
                             targets: 0,  // Replace with the correct target column index
@@ -370,15 +363,13 @@
                         { data: 'remaining' },
                         {
                             data: null,
-                            render: (_, __, row) => {
-                                return `<div class="d-flex" style="gap: 8px;">
-                                    <button class="btn btn-info btn-sm" onclick="cancelAction('${row._id}', '${row.type}')">
-                                        <i class="fas fa-pencil"></i> Modifier
-                                    </button>
+                            render: (_, __, row, table) => {
+                                return (table.row === 0) ?
+                                `<div class="d-flex" style="gap: 8px;">
                                     <button class="btn btn-dark btn-sm" onclick="cancelAction('${row._id}', '${row.type}')">
                                         <i class="fas fa-times"></i> Annuler
                                     </button>
-                                </div>`
+                                </div>` : ''
                             }
                         },
                     ]
@@ -400,20 +391,20 @@
             let inputDate = $(`#date-${productId}`);
             let input = $(`#qty-${productId}`);
 
-            let action = btn.attr('title');
+            let actionType = btn.attr('title');
 
-            if (!['entry', 'exit'].includes(action)) {
+            if (!['entry', 'exit'].includes(actionType)) {
                 return alert('no action')
             }
 
             // // send request
-            const res = await axios.post(`/api/product/${action}`, {
+            const res = await axios.post(`/api/product/action`, {
                 productId: productId,
                 date: inputDate.val(),
-                quantity: +input.val()
+                quantity: actionType === 'entry' ? +input.val() : -input.val()
             });
 
-            const {ok, product} = res.data;
+            const {ok, product, action, message} = res.data;
             
             if (res.data.ok) {
                 const tr = btn.closest('tr').prev();
@@ -422,8 +413,10 @@
                 input.val('0');
                 // refresh subtable
                 subtable.ajax.reload();
+                // 
+                Alert(`Vous avez ${action === 'entry' ? 'entré' : 'sorti'} ${action.quantity} unités du produit: ${product.name}.`);
             } else {
-                console.error('Action failed!')
+                Error(message);
             }
         }
 
@@ -452,11 +445,43 @@
                 table.row.add(data).draw();
                 // reset form
                 $(this).trigger('reset');
+                // success
+                Alert('Un produit a été ajouté!');
             } else {
-                alert(message)
+                Error(message)
             }
         });
 
+        
+        // handle submit form (add product)
+        $('#add-group-form').on('submit', async function(e) {
+            e.preventDefault();
+
+            var formArray = $(this).serializeArray();
+            console.log(formArray)
+            var formData = {};
+
+            $.each(formArray, function(_, field) {
+                formData[field.name] = field.value;
+            });
+
+            // send request (POST)
+            const res = await axios.post('/api/product/groups/all', {
+                ...formData
+            });
+
+            const {ok, data, message} = res.data;
+
+            if (ok) {
+                // populate the new product to the list
+                // reset form
+                $(this).trigger('reset');
+                // success
+                Alert('Un group de produit a été crée!');
+            } else {
+                Error(message)
+            }
+        });
 
         // method to cancel actions
         async function cancelAction(actionId, type = 'entry') {
@@ -464,8 +489,8 @@
             let $tr = $(document.activeElement).closest('tr');
             let $row = $tr.closest('table').closest('tr').prev(('tr'))
 
-            let formData = type === 'entry' ? { entryId: actionId } : { exitId: actionId };
-            const res = await axios.post(`/api/product/${type}/cancel`, formData);
+            let formData = { actionId };
+            const res = await axios.post(`/api/product/action/cancel`, formData);
 
             const { ok, canceled, product, message } = res.data;
 
@@ -476,9 +501,11 @@
                 table.row($row).data(product).draw();
                 // reload subtable
                 subtable.ajax.reload();
+                // show success
+                Alert('Une transaction a été annulée.');
 
             } else {
-                alert(message)
+                Error(message)
             }
 
         }
@@ -492,7 +519,7 @@
             if (ok) {
                 return data;
             } else {
-                alert(message)
+                Error(message)
                 return [];
             }
         }
