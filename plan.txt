@@ -1,0 +1,7 @@
+1 - Tableau de bord (tracking)
+
+2 - Integration dans l'application tools.
+
+3 - Authentification requise (email et mot de passe)
+
+4 - Historique des ajouts et des changements.

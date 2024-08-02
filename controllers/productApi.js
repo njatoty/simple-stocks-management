@@ -188,6 +188,7 @@ async function addActionProduct(req, res) {
     }
 }
 
+
 // method to cancel exit (POST)
 async function cancelActionProduct(req, res) {
     try {
@@ -231,14 +232,15 @@ async function updateActionProduct(req, res) {
 
         // id of the action
         const { id } = req.params;
-        const { quantity } = req.body;
+        const { quantity, date } = req.body;
+
+        console.log(req.body)
 
         // si la quantité est négative
         const newType = (quantity < 0) ? 'exit' : 'entry';
-        quantity = (quantity < 0) ? -quantity : quantity;
         
         // get current action
-        const action = await Action.findById(id).populate('product');
+        var action = await Action.findById(id).populate('product');
 
         // if action is null
         if (!action) {
@@ -249,28 +251,50 @@ async function updateActionProduct(req, res) {
             });
         }
 
-        
-        // update action
-        const updatedAction = await Action.findByIdAndUpdate(id, {
-            type: newType,
-            quantity: quantity
-        }, { new: true });
+        // difference of quantity
+        const diff = quantity + action.quantity;
+
+        // update quantity of the action
+        action.quantity = Math.abs(quantity);
+        action.type = newType;
+        if (date) action.date = date;
+        await action.save();
+
+        // Adjust remaining quantities of posterior records
+        const subsquentActions = await Action.find({
+            product: action.product._id,
+            date: {
+                $gte: action.date
+            }
+        }).sort('date');
+
+        for (let i = 0; i < subsquentActions.length; i++) {
+            const sa = subsquentActions[i];
+            sa.remaining += diff;
+
+            console.log(sa.date, sa.remaining)
+            if (sa.remaining < 0) {
+                return res.json({
+                    ok: false,
+                    message: 'Le nombre de quantité de produit est insuffisant, nous obtenons une valeur négative.'
+                })
+            } else {
+                // update
+                sa.save();
+            }
+            
+        }
+
 
         // update also product (change available quantity)
         const updatedProduct = await Product.findByIdAndUpdate(action.product._id, {
-            quantityAvailable: action.product.quantityAvailable - action.quantity + updatedAction.quantity
+            quantityAvailable: diff + action.product.quantityAvailable
         }, { new: true });
-
-        /**
-            entry = 10
-            newEntry = 5
-            product = 14
-            qty = product - entry + newEntry
-        **/
+        
 
         res.json({
             ok: true,
-            action: updatedAction,
+            action: action,
             product: updatedProduct
         });
 
@@ -532,7 +556,7 @@ async function fetchActionRecents(req, res) {
         },
         ...filter
     })
-    .sort({ updatedAt: 'desc'})
+    .sort({ date: 'desc'})
     .populate('product');
 
     res.json({

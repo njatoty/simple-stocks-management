@@ -272,7 +272,7 @@
                             <b class="align-self-center">Date: </b>
                             <input type="date" id="date-${row._id}" class="form-control" sstyle="height: 20px !important;" required value="${now}">
                             
-                            <b class="align-self-center">Quantity: </b>
+                            <b class="align-self-center">Quantité: </b>
                             <input type="number" id="qty-${row._id}" class="form-control form-control-sm" style="height: auto !important;" value="0" aria-label="Product quantity" required min="1">
                             <button type="submit" title="entry" id="enterbtn-${row._id}" class="btn btn-success btn-sm mx-1">
                                 <i class="fa fa-plus mr-2"></i> Entrer
@@ -290,7 +290,7 @@
                                         <tr>
                                             <th scope="col">Type</th>
                                             <th scope="col">Date</th>
-                                            <th scope="col">Quantity</th>
+                                            <th scope="col">Quantité</th>
                                             <th scope="col">Restant</th>
                                             <th scope="col"></th>   
                                         </tr>    
@@ -333,6 +333,23 @@
                     info: false,
                     columnDefs: [
                         {
+                            targets: 1,
+                            createdCell: function (td, cellData, rowData, row, col) {
+                                // Adding a data attribute to the cell
+                                $(td).attr('td-name', 'date');
+                                $(td).attr('type', 'date');
+                                $(td).attr('date-value', cellData.split('T')[0]);
+                            }
+                        },
+                        {
+                            targets: 2,
+                            createdCell: function (td, cellData, rowData, row, col) {
+                                // Adding a data attribute to the cell
+                                $(td).attr('td-name', 'quantity');
+                                $(td).attr('type', 'number');
+                            }
+                        },
+                        {
                             targets: [2, 3],
                             className: 'dt-body-center'
                         },
@@ -364,10 +381,20 @@
                         {
                             data: null,
                             render: (_, __, row, table) => {
-                                return (table.row === 0) ?
+                                return (table.row >= 0) ?
                                 `<div class="d-flex" style="gap: 8px;">
-                                    <button class="btn btn-dark btn-sm" onclick="cancelAction('${row._id}', '${row.type}')">
-                                        <i class="fas fa-times"></i> Annuler
+                                    <button class="btn btn-outline-dark btn-sm mr-3 edit-btn" onclick="cancelAction('${row._id}', '${row.type}')">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm edit-btn" onclick="editRowAction('${row._id}', '${row.type}')">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+
+                                    <button class="btn btn-outline-success btn-sm mr-3 save-btn" onclick="handleSaveRowAction('${row._id}')">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm cancel-btn" onclick="handleCancelAction()">
+                                        <i class="fas fa-arrow-left"></i>
                                     </button>
                                 </div>` : ''
                             }
@@ -382,6 +409,54 @@
 
             }
         });
+
+        // method to update action
+        async function handleSaveRowAction(actionId) {
+            const $tr = $(document.activeElement).closest('tr');
+            let qtyInput = $tr.find('input[type="number"]');
+            let dateInput = $tr.find('input[type="date"]');
+
+            if (new Date(dateInput.val()) === 'Invalid Date') {
+                return Error('Veuillez remplir la date correctement!')
+            }
+            // post to server
+            const res = await axios.put(`/api/product/action/${actionId}`, {
+                date: dateInput.val(),
+                quantity: +qtyInput.val()
+            });
+
+            const { ok, message } = res.data;
+
+            if (ok) {
+                subtable.ajax.reload();
+                Alert('Modification de transactions en success')
+            } else {
+                Error(message);
+            }
+
+
+        }
+
+        function handleCancelAction() {
+            if (subtable) {
+                subtable.ajax.reload();
+            }
+        }
+
+        
+        // edit row
+        function editRowAction(productId) {
+            var $row = $(document.activeElement).closest('tr');
+            $row.find('td').not(':first').not(':last').each(function() {
+                var $cell = $(this);
+                var type = $cell.attr('type');
+                var name = $cell.attr('td-name');
+                var text = type === 'date' ? $cell.attr('date-value') : $cell.text();
+                if (['date', 'quantity'].includes(name))
+                    $cell.html(`<input name="${name}" type="${type}" class="form-control" value="${text}"/>`);
+            });
+            $row.addClass('as-form');
+        }
 
         // method to enter or exit product
         async function handleAction(productId) {
