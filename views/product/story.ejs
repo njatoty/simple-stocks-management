@@ -1,0 +1,103 @@
+<div class="container">
+    <table id="stories-list" class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Notification</th>
+                <th>Produit</th>
+                <th>Utilisateur</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/2.1.2/js/dataTables.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment-with-locales.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.2/axios.min.js"></script>
+<script>
+
+    function groupDates(data) {
+        const today = moment().startOf('day');
+        const yesterday = moment().subtract(1, 'days').startOf('day');
+        const startOfThisMonth = moment().startOf('month');
+        const startOfLastMonth = moment().subtract(1, 'months').startOf('month');
+
+        const groupedData = {
+            today: [],
+            yesterday: [],
+            lastMonth: [],
+            earlier: []
+        };
+
+        data.forEach(item => {
+            const date = moment(item.date);
+
+            if (date.isSame(today, 'day')) {
+                groupedData.today.push(item);
+            } else if (date.isSame(yesterday, 'day')) {
+                groupedData.yesterday.push(item);
+            } else if (date.isSame(startOfThisMonth, 'month')) {
+                // This month but not today or yesterday
+                if (!date.isSame(today, 'day') && !date.isSame(yesterday, 'day')) {
+                    groupedData.earlier.push(item);
+                }
+            } else if (date.isSame(startOfLastMonth, 'month')) {
+                groupedData.lastMonth.push(item);
+            } else {
+                // Anything earlier
+                groupedData.earlier.push(item);
+            }
+        });
+
+        return groupedData;
+    }
+
+    $(document).ready(async function(){
+        const res = await axios.get('/api/story/all')
+
+        const { ok, data, message} = res.data;
+
+        if (ok) {
+
+            const groupedData = groupDates(data);
+            var rows = '';
+            let body = $('#stories-list tbody');
+
+            Object.entries(groupedData).map(([key, value]) => {
+                
+                if (value.length > 0)
+                    rows += `<tr>
+                        <td colspan="5">${key}</td>    
+                    </tr>`
+
+                rows += value.map(story => `
+                    <tr>
+                        <td>${moment(story.date).format('DD/MM/YYYY')}</td>
+                        <td>${story.message}</td>
+                        <td>${story.product?.name}</td>
+                        <td>
+                            <div>
+                                <div>${story.user.name.slice(0, 2)}</div>
+                                ${story.user.email}
+                            </div>
+                        </td>
+                        <td>${moment(story.date).locale('fr').fromNow()}</td>
+                    </tr>
+                `).join('');
+                
+            })
+            
+            body.html(rows);
+
+        } else {
+            Error(message)
+        }
+    });
+</script>

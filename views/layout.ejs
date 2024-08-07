@@ -122,16 +122,19 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarColor03">
                     <ul class="navbar-nav me-auto">
-                        <!-- <li class="nav-item">
+                        <li class="nav-item">
                             <a class="nav-link" href="/product/dashboard">Tableau de bord
                                 <span class="visually-hidden">(current)</span>
                             </a>
-                        </li> -->
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/product/list">Liste de stocks</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/product/stocks-calendar">Calendrier de stocks</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/product/story">Historiques</a>
                         </li>
                     </ul>
                 </div>
@@ -175,7 +178,6 @@
 
         
         function Error(message) {
-            
             Toastify({
                 text: message,
                 duration: 8000,
@@ -190,6 +192,21 @@
                 },
                 onClick: function(){} // Callback after click
             }).showToast();
+        }
+
+        
+        function generateColorFromId(str) {
+                
+            let hash = 0;
+            str.split('').forEach(char => {
+                hash = char.charCodeAt(0) + ((hash << 5) - hash)
+            })
+            let colour = '#'
+            for (let i = 0; i < 3; i++) {
+                const value = (hash >> (i * 8)) & 0xff
+                colour += value.toString(16).padStart(2, '0')
+            }
+            return colour
         }
     </script>
 </body>

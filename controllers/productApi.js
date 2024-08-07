@@ -3,6 +3,9 @@ const Action = require("../models/ActionModel");
 const Product = require("../models/ProductModel");
 const moment = require('moment');
 const Group = require("../models/ProductGroupModel");
+const Story = require("../models/StoryModel");
+
+const defaultUserId = '66b3261bffe5b3c2f1601856';
 
 // method to get all products (GET)
 async function fetchProducts(req, res) {
@@ -55,7 +58,8 @@ async function createProduct(req, res) {
                 // remaining quantity
                 remaining: product.quantityAvailable,
                 quantity: product.quantityAvailable,
-                date: product.date
+                date: product.date,
+                user: defaultUserId
             });
 
         }
@@ -88,7 +92,11 @@ async function createProduct(req, res) {
 async function updateProduct(req, res) {
     try {
         const { id } = req.params;
-        const updated = await Product.findByIdAndUpdate(id, req.body, { new: true });
+        const updated = await Product.findByIdAndUpdate(id, {
+            user: defaultUserId,
+            ...req.body
+        }, { new: true });
+
         res.json({
             ok: true,
             data: updated
@@ -134,11 +142,11 @@ async function deleteProduct(req, res) {
 /**
  * ACTION 
  */
-// method to do action (EXIT if quanity is negative. ENTRY if quantity is positive) product (POST)
+// method to do action (EXIT if quantity is negative. ENTRY if quantity is positive) product (POST)
 async function addActionProduct(req, res) {
     try {
 
-        var { productId, quantity, ...rest } = req.body;
+        var { productId, quantity, date, ...rest } = req.body;
 
         // parse it quantity
         quantity = parseInt(quantity);
@@ -147,16 +155,17 @@ async function addActionProduct(req, res) {
         // select the product
         const product = await Product.findById(productId);
 
-        console.log(product.quantityAvailable + quantity)
         // there is product
         if (product.quantityAvailable + quantity >= 0) {
             // insert exit product
-            const exitedProduct = await Action.create({
+            const action = await Action.create({
                 type: type,
                 product: productId,
-                quantity: Math.abs(quantity), // always positive number
+                quantity: Math.abs(quantity), // always a positive number
                 // remaining quantity
                 remaining: product.quantityAvailable + quantity,
+                date: addCurrentTimeToDate(date).toDate(),
+                user: defaultUserId,
                 ...rest
             });
 
@@ -164,10 +173,21 @@ async function addActionProduct(req, res) {
             const editedProduct = await Product.findByIdAndUpdate(productId, {
                 quantityAvailable: product.quantityAvailable + quantity
             }, { new: true });
+
+            // insert story
+            Story.create({
+                user: defaultUserId,
+                product: editedProduct.id,
+                productAction: action._id,
+                count: quantity,
+                action: 'C',
+                target: type,
+                comment: "Faire une action sur un produit"
+            });
     
             res.json({
                 ok: true,
-                action: exitedProduct,
+                action: action,
                 product: editedProduct
             });
             
@@ -197,6 +217,12 @@ async function cancelActionProduct(req, res) {
 
         // find exit and get product
         const action = await Action.findById(actionId).populate('product');
+        if (!action) {
+            return res.json({
+                ok: false,
+                message: 'Action introuvable!'
+            })
+        }
         // select the product
         const product = action.product;
 
@@ -210,6 +236,18 @@ async function cancelActionProduct(req, res) {
 
         // delete action
         const deletedAction = await Action.findByIdAndDelete(action._id);
+
+        
+        // insert story
+        Story.create({
+            user: defaultUserId,
+            product: updatedProduct._id,
+            productAction: action._id,
+            count: quantity,
+            action: 'c',
+            target: action.type,
+            comment: "Faire une action sur un produit le " + action.date.toLocaleDateString('fr')
+        });
 
         res.json({
             ok: true,
@@ -232,12 +270,7 @@ async function updateActionProduct(req, res) {
 
         // id of the action
         const { id } = req.params;
-        const { quantity, date } = req.body;
-
-        console.log(req.body)
-
-        // si la quantité est négative
-        const newType = (quantity < 0) ? 'exit' : 'entry';
+        const { quantity, date, action: actionType } = req.body;
         
         // get current action
         var action = await Action.findById(id).populate('product');
@@ -252,12 +285,32 @@ async function updateActionProduct(req, res) {
         }
 
         // difference of quantity
-        const diff = quantity + action.quantity;
+        var diff = Math.abs(quantity) - action.quantity;
+
+        // check if there is a change in action type
+        if (actionType !== action.type) {
+            if (actionType === 'entry')
+                diff = quantity + action.quantity;
+            else if (actionType === 'exit')
+                diff = quantity - action.quantity;
+        } else {
+            if (action.type === 'exit') {
+                // convert to negative number
+                diff = -diff;
+            }
+        }
+
+        if (diff + action.product.quantityAvailable < 0) {
+            return res.json({
+                ok: false,
+                message: 'La modification a engendré une quantité négative du produit restant'
+            })
+        }
 
         // update quantity of the action
         action.quantity = Math.abs(quantity);
-        action.type = newType;
-        if (date) action.date = date;
+        action.type = actionType;
+        if (date) action.date = changeDateKeepTime(date, action.date).toDate();
         await action.save();
 
         // Adjust remaining quantities of posterior records
@@ -266,31 +319,36 @@ async function updateActionProduct(req, res) {
             date: {
                 $gte: action.date
             }
-        }).sort('date');
+        }).sort({
+            date: 'desc'
+        });
 
         for (let i = 0; i < subsquentActions.length; i++) {
             const sa = subsquentActions[i];
             sa.remaining += diff;
-
-            console.log(sa.date, sa.remaining)
-            if (sa.remaining < 0) {
-                return res.json({
-                    ok: false,
-                    message: 'Le nombre de quantité de produit est insuffisant, nous obtenons une valeur négative.'
-                })
-            } else {
-                // update
-                sa.save();
-            }
-            
+            // console.log(sa.type, sa.date, sa.remaining)
+            // update
+            sa.save();
         }
 
-
+        // console.log('Rest:', diff + action.product.quantityAvailable)
         // update also product (change available quantity)
         const updatedProduct = await Product.findByIdAndUpdate(action.product._id, {
             quantityAvailable: diff + action.product.quantityAvailable
         }, { new: true });
         
+        
+        // insert story
+        Story.create({
+            user: defaultUserId,
+            product: updatedProduct.id,
+            productAction: action._id,
+            count: quantity,
+            action: 'U',
+            target: actionType,
+            comment: "Faire une action sur un produit"
+        });
+    
 
         res.json({
             ok: true,
@@ -548,16 +606,24 @@ async function fetchActionRecents(req, res) {
 
     let filter = id ? {product: id} : {};
 
-    let today = moment().startOf('day').toDate();
+    let { limit = Number.MAX_SAFE_INTEGER, today } = req.query;
+
+    // other filter
+    let ofilter = {};
+    if (today === 'true') {
+        ofilter = {
+            ...ofilter,
+            updateAt: { $gte: moment().startOf('day').toDate() }
+        }
+    }
 
     const actions = await Action.find({
-        updatedAt: {
-            $gte: today
-        },
+        ...ofilter,
         ...filter
     })
     .sort({ date: 'desc'})
-    .populate('product');
+    .populate('product')
+    .limit(limit);
 
     res.json({
         ok: true,
@@ -724,6 +790,99 @@ async function getProductDailyTransactions(req, res) {
 }
 
 
+// method to get historical trends
+
+async function getHistoricalTrends(req, res) {
+    const result = await Action.aggregate([
+        {
+            $group: {
+                _id: {
+                    product: '$product',
+                    date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }
+                },
+                totalQuantity: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ['$type', 'entry'] },
+                            '$quantity',
+                            { $multiply: ['$quantity', -1] }
+                        ]
+                    }
+                },
+                remaining: { $last: '$remaining' },
+                type: { $last: '$type' }
+            }
+        },
+        {
+            $lookup: {
+                from: 'products',
+                localField: '_id.product',
+                foreignField: '_id',
+                as: 'productDetails'
+            }
+        },
+        {
+            $unwind: '$productDetails'
+        },
+        {
+            $sort: { '_id.date': 1 }
+        },
+        {
+            $group: {
+                _id: '$_id.date',
+                products: {
+                    $push: {
+                        product: '$productDetails.name',
+                        quantity: '$totalQuantity',
+                        remaining: '$remaining',
+                        type: '$type'
+                    }
+                }
+            }
+        },
+        {
+            $sort: { '_id': 1 }
+        }
+    ]);
+
+    return res.json({
+        ok: true,
+        data: result
+    });
+}
+
+function addCurrentTimeToDate(dateString) {
+    // Parse the given date string to a Moment object
+    let givenDate = moment(dateString);
+    // Get the current time using Moment
+    let currentTime = moment();
+    // Set the time components of the given date to the current time
+    givenDate.set({
+        hour: currentTime.hour(),
+        minute: currentTime.minute(),
+        second: currentTime.second(),
+        millisecond: currentTime.millisecond()
+    });
+    
+    return givenDate;
+}
+
+
+function changeDateKeepTime(dateString, oldDateString) {
+    // Parse the given date string to a Moment object
+    let givenDate = moment(dateString);
+    // Get the current date and time using Moment
+    let currentDateTime = moment(oldDateString);
+    // Set the date components of the current date and time to those of the given date
+    currentDateTime.set({
+        year: givenDate.year(),
+        month: givenDate.month(), // month is 0-indexed in Moment.js
+        date: givenDate.date()
+    });
+    return currentDateTime;
+}
+
+
 module.exports = {
     fetchProducts, createProduct, updateProduct, deleteProduct,
     addActionProduct, fetchProductById,
@@ -741,5 +900,6 @@ module.exports = {
     fetchActionRecents,
     // daily transactions
     getProductDailyTransactions,
-    fetchAllActions
+    fetchAllActions,
+    getHistoricalTrends
 };
