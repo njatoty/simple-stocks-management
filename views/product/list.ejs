@@ -1,195 +1,224 @@
-    <div class="border-b pb-2 mb-4">
-        <div class="accordion" id="accordionExample">
-            <div class="accordion-item p-2">
-                <h4 class="accordion-header accordion-btn-groups" id="headingOne">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#addproduct" aria-expanded="false" aria-controls="addproduct">
-                        <i class="fas fa-plus mr-4"></i> Insérer un nouveau produit
-                    </button>
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#addgroup" aria-expanded="false" aria-controls="addgroup">
-                        <i class="fas fa-plus mr-4"></i> Créer un groupe de produit
-                    </button>
-                </h4>
+<div class="border-b pb-2 mb-4">
+    <div class="accordion" id="accordionExample">
+        <div class="accordion-item p-2">
+            <h4 class="accordion-header accordion-btn-groups" id="headingOne">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#addproduct" aria-expanded="false" aria-controls="addproduct">
+                    <i class="fas fa-plus mr-4"></i> Insérer un nouveau produit
+                </button>
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#addgroup" aria-expanded="false" aria-controls="addgroup">
+                    <i class="fas fa-plus mr-4"></i> Créer un groupe de produit
+                </button>
+            </h4>
 
-                <div id="addproduct" class="accordion-collapse collapse" aria-labelledby="addproduct" data-bs-parent="#accordionExample">
-                    <div class="accordion-body custom-accordion-body">
-                        <form id="add-product-form">
-                            <fieldset>
-                                <!-- <legend class="mb-0">Nouveau produit</legend> -->
-                                <div class="row">
-                                    <div class="col-md-4" hidden>
-                                        <div>
-                                            <label for="category" class="form-label mt-4">Catégorie</label>
-                                            <select class="form-control custom-select" name="category" id="category">
-                                                <option>Consommable</option>
-                                                <option>Matériel</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div>
-                                            <label for="group" class="form-label mt-4">Groupe</label>
-                                            <select class="form-control custom-select" name="group" id="product-groups" required></select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div>
-                                            <label for="date" class="form-label mt-4">Date</label>
-                                            <input class="form-control" type="date" name="date" id="date" required>
-                                        </div>
+            <div id="addproduct" class="accordion-collapse collapse" aria-labelledby="addproduct"
+                data-bs-parent="#accordionExample">
+                <div class="accordion-body custom-accordion-body">
+                    <form id="add-product-form">
+                        <fieldset>
+                            <!-- <legend class="mb-0">Nouveau produit</legend> -->
+                            <div class="row">
+                                <div class="col-md-4" hidden>
+                                    <div>
+                                        <label for="category" class="form-label mt-4">Catégorie</label>
+                                        <select class="form-control custom-select" name="category" id="category">
+                                            <option>Consommable</option>
+                                            <option>Matériel</option>
+                                        </select>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div>
-                                            <label for="name" class="form-label mt-4">Nom du produit</label>
-                                            <input class="form-control" type="text" name="name" id="name" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div>
-                                            <label for="quantityAvailable" class="form-label mt-4">Quantité</label>
-                                            <input class="form-control" type="number" name="quantityAvailable" id="quantityAvailable" required>
-                                        </div>
+                                <div class="col-md-4">
+                                    <div>
+                                        <label for="group" class="form-label mt-4">Groupe</label>
+                                        <select class="form-control custom-select" name="group" id="product-groups"
+                                            required></select>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div>
-                                            <label for="description" class="form-label mt-4">Déscription</label>
-                                            <textarea class="form-control" name="description" id="description" rows="2"></textarea>
-                                        </div>
+                                <div class="col-md-4">
+                                    <div>
+                                        <label for="date" class="form-label mt-4">Date</label>
+                                        <input class="form-control" type="date" name="date" id="date" required>
                                     </div>
                                 </div>
-                                <div class="mt-4">
-                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div>
+                                        <label for="name" class="form-label mt-4">Nom du produit</label>
+                                        <input class="form-control" type="text" name="name" id="name" required>
+                                    </div>
                                 </div>
-                            </fieldset>
-                        </form>
-                    </div>
+                                <div class="col-md-6">
+                                    <div>
+                                        <label for="quantityAvailable" class="form-label mt-4">Quantité</label>
+                                        <input class="form-control" type="number" name="quantityAvailable"
+                                            id="quantityAvailable" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div>
+                                        <label for="description" class="form-label mt-4">Déscription</label>
+                                        <textarea class="form-control" name="description" id="description"
+                                            rows="2"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            </div>
+                        </fieldset>
+                    </form>
                 </div>
-                
-                <div id="addgroup" class="accordion-collapse collapse" aria-labelledby="addproduct" data-bs-parent="#accordionExample">
-                    <div class="accordion-body">
-                        <form id="add-group-form">
-                            <fieldset>
-                                <!-- <legend class="mb-0">Nouveau produit</legend> -->
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div>
-                                            <label for="group" class="form-label mt-4">Nom du groupe</label>
-                                            <input class="form-control" type="text" name="name" id="group" required>
-                                        </div>
+            </div>
+
+            <div id="addgroup" class="accordion-collapse collapse" aria-labelledby="addproduct"
+                data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    <form id="add-group-form">
+                        <fieldset>
+                            <!-- <legend class="mb-0">Nouveau produit</legend> -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div>
+                                        <label for="group" class="form-label mt-4">Nom du groupe</label>
+                                        <input class="form-control" type="text" name="name" id="group" required>
                                     </div>
                                 </div>
-                                <div class="mt-4">
-                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                                </div>
-                            </fieldset>
-                        </form>
-                    </div>
+                            </div>
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            </div>
+                        </fieldset>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <table id="product-table" class="table table-hover display nowrap dataTable dtr-inline collapsed">
-        <thead>
-            <tr>
-                <th scope="col"></th>
-                <th scope="col">Nom du produit</th>
-                <th scope="col">Déscription</th>
-                <th scope="col">Quantité disponible</th>
-                <th scope="col">Date d'insertion</th>
-                <!-- <th scope="col">Date de modification</th> -->
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- datatable -->
-        </tbody>
-    </table>
+<table id="product-table" class="table table-hover display nowrap dataTable dtr-inline collapsed">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col">Nom du produit</th>
+            <th scope="col">Déscription</th>
+            <th scope="col">Quantité disponible</th>
+            <th scope="col">Date d'insertion</th>
+            <!-- <th scope="col">Date de modification</th> -->
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- datatable -->
+    </tbody>
+</table>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://cdn.datatables.net/2.1.2/js/dataTables.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment-with-locales.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.2/axios.min.js"></script>
-    <script>
-        // langue config
-        const dt_lang = { 
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/2.1.2/i18n/fr-FR.json'
-            }
-        };
+<!-- Modal -->
+<div class="modal fade" id="cancel-modal" tabindex="-1" aria-labelledby="cancelModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Annulation d'une action.</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Vous voules annulez <span id="m-action-type">:type:</span> de <span id="m-action-qty">:0:</span> produits.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="confirm-btn">Oui, confirmer</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non, fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+<button data-bs-toggle="modal" data-bs-target="#cancel-modal" hidden id="open-cancel-modal">ok</button>
 
-        const table = $('#product-table').DataTable({
-            ...dt_lang,
-            columnDefs: [
-                {
-                    targets: [4],
-                    render: DataTable.render.datetime('DD/MM/YYYY'),
-                    className: 'dt-body-left dt-head-left',
-                    createdCell: function (td, cellData, rowData, row, col) {
-                        // Adding a data attribute to the cell
-                        $(td).attr('type', 'date');
-                        $(td).attr('date-value', cellData.split('T')[0]);
-                        $(td).attr('td-name', 'date');
-                    }
-                },
-                {
-                    targets: 3,
-                    className: 'dt-body-center dt-head-center',
-                    createdCell: function (td, cellData, rowData, row, col) {
-                        // Adding a data attribute to the cell
-                        $(td).attr('type', 'number');
-                        $(td).attr('td-name', 'quantityAvailable');
-                    }
-                },
-                {
-                    targets: 1,
-                    width: '25%',
-                    createdCell: function (td, cellData, rowData, row, col) {
-                        // Adding a data attribute to the cell
-                        $(td).attr('type', 'text');
-                        $(td).attr('td-name', 'name');
-                    }
-                },
-                {
-                    targets: 2,
-                    className: 'centered-cell',
-                    createdCell: function (td, cellData, rowData, row, col) {
-                        // Adding a data attribute to the cell
-                        $(td).attr('type', 'text');
-                        $(td).attr('td-name', 'description');
-                    }
-                },
-                {
-                    targets: 5,
-                    className: 'centered-cell',
-                },
-            ],
-            responsive: true,
-            ajax: {
-                url: '/api/product',
-                dataSrc: 'data'
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/2.1.2/js/dataTables.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment-with-locales.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.2/axios.min.js"></script>
+<script>
+    // langue config
+    const dt_lang = {
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/2.1.2/i18n/fr-FR.json'
+        }
+    };
+
+    const table = $('#product-table').DataTable({
+        ...dt_lang,
+        columnDefs: [
+            {
+                targets: [4],
+                render: DataTable.render.datetime('DD/MM/YYYY'),
+                className: 'dt-body-left dt-head-left',
+                createdCell: function (td, cellData, rowData, row, col) {
+                    // Adding a data attribute to the cell
+                    $(td).attr('type', 'date');
+                    $(td).attr('date-value', cellData.split('T')[0]);
+                    $(td).attr('td-name', 'date');
+                }
             },
-            columns: [
-                {
-                    className: 'details-control',
-                    orderable: false,
-                    data: null,
-                    defaultContent: ''
-                },
-                { data: 'name' },
-                { data: 'description' },
-                // { data: 'groupe' },
-                { data: 'quantityAvailable' },
-                { data: 'date' },
-                // { data: 'updatedAt' },
-                {
-                    data: null,
-                    orderable: false,
-                    render: (l, d, row) => {
-                        return `
+            {
+                targets: 3,
+                className: 'dt-body-center dt-head-center',
+                createdCell: function (td, cellData, rowData, row, col) {
+                    // Adding a data attribute to the cell
+                    $(td).attr('type', 'number');
+                    $(td).attr('td-name', 'quantityAvailable');
+                }
+            },
+            {
+                targets: 1,
+                width: '25%',
+                createdCell: function (td, cellData, rowData, row, col) {
+                    // Adding a data attribute to the cell
+                    $(td).attr('type', 'text');
+                    $(td).attr('td-name', 'name');
+                }
+            },
+            {
+                targets: 2,
+                className: 'centered-cell',
+                createdCell: function (td, cellData, rowData, row, col) {
+                    // Adding a data attribute to the cell
+                    $(td).attr('type', 'text');
+                    $(td).attr('td-name', 'description');
+                }
+            },
+            {
+                targets: 5,
+                className: 'centered-cell',
+            },
+        ],
+        responsive: true,
+        ajax: {
+            url: '/api/product',
+            dataSrc: 'data'
+        },
+        columns: [
+            {
+                className: 'details-control',
+                orderable: false,
+                data: null,
+                defaultContent: ''
+            },
+            { data: 'name' },
+            { data: 'description' },
+            // { data: 'groupe' },
+            { data: 'quantityAvailable' },
+            { data: 'date' },
+            // { data: 'updatedAt' },
+            {
+                data: null,
+                orderable: false,
+                render: (l, d, row) => {
+                    return `
                         <div class="${row._id}">
                             <button class="btn btn-outline-info btn-sm edit-btn" onClick="editRow('${row._id}')">
                                 <i class="fa fa-pencil"></i>
@@ -199,64 +228,64 @@
                             </button>
                         </div>
                         `;
-                    }
                 }
-            ]
+            }
+        ]
+    });
+
+    // edit row
+    function editRow(productId) {
+        var $row = $(document.activeElement).closest('tr');
+        $row.find('td').not(':first').not(':last').each(function () {
+            var $cell = $(this);
+            var text = $cell.text();
+            var type = $cell.attr('type');
+            var name = $cell.attr('td-name');
+            var readOnly = $cell.attr('isReadOnly') === 'true' ? true : false;
+            if (type === 'date') text = $cell.attr('date-value');
+            if (['name', 'description'].includes(name))
+                $cell.html(`<input name="${name}" type="${type}" class="form-control" value="${text}" ${readOnly ? "readOnly" : ""} />`);
+        });
+        $row.addClass('as-form');
+    }
+
+    // update row
+    async function updateRow(productId) {
+        var $tr = $(document.activeElement).closest('tr');
+        var dataObj = {};
+        $tr.find('input').each(function () {
+            var $input = $(this);
+            let key = $input.attr('name');
+            if (key !== 'undefined')
+                dataObj[key] = $input.val();
         });
 
-        // edit row
-        function editRow(productId) {
-            var $row = $(document.activeElement).closest('tr');
-            $row.find('td').not(':first').not(':last').each(function() {
-                var $cell = $(this);
-                var text = $cell.text();
-                var type = $cell.attr('type');
-                var name = $cell.attr('td-name');
-                var readOnly = $cell.attr('isReadOnly') === 'true' ? true : false;
-                if (type === 'date') text = $cell.attr('date-value');
-                if (['name', 'description'].includes(name))
-                    $cell.html(`<input name="${name}" type="${type}" class="form-control" value="${text}" ${readOnly ? "readOnly" : ""} />`);
-            });
-            $row.addClass('as-form');
+        // post to server
+        const res = await axios.put(`/api/product/${productId}`, {
+            ...dataObj
+        });
+
+        const { ok, data, message } = res.data;
+
+        console.log(res.data)
+
+        if (ok) {
+            // update row
+            const row = table.row($tr);
+            row.data(data).draw();
+            $tr.removeClass('as-form');
+            Alert('Un produit a été modifié.');
+        } else {
+            Error(message)
         }
 
-        // update row
-        async function updateRow(productId) {
-            var $tr = $(document.activeElement).closest('tr');
-            var dataObj = {};
-            $tr.find('input').each(function() {
-                var $input = $(this);
-                let key = $input.attr('name');
-                if (key !== 'undefined')
-                    dataObj[key] = $input.val();
-            });
+    }
 
-            // post to server
-            const res = await axios.put(`/api/product/${productId}`, {
-                ...dataObj
-            });
+    // format 
+    async function format(row) {
+        let now = moment().format('YYYY-MM-DD');
 
-            const {ok, data, message} = res.data;
-
-            console.log(res.data)
-
-            if (ok) {
-                // update row
-                const row = table.row($tr);
-                row.data(data).draw();
-                $tr.removeClass('as-form');
-                Alert('Un produit a été modifié.');
-            } else {
-                Error(message)
-            }
-
-        }
-
-        // format 
-        async function format(row) {
-            let now = moment().format('YYYY-MM-DD');
-            
-            return `
+        return `
                 <div style="">
                     <table class="table" hidden>
                         <tbody>
@@ -272,7 +301,7 @@
                             <b class="align-self-center">Date: </b>
                             <input type="date" id="date-${row._id}" class="form-control" sstyle="height: 20px !important;" required value="${now}">
                             
-                            <b class="align-self-center">Quantity: </b>
+                            <b class="align-self-center">Quantité: </b>
                             <input type="number" id="qty-${row._id}" class="form-control form-control-sm" style="height: auto !important;" value="0" aria-label="Product quantity" required min="1">
                             <button type="submit" title="entry" id="enterbtn-${row._id}" class="btn btn-success btn-sm mx-1">
                                 <i class="fa fa-plus mr-2"></i> Entrer
@@ -290,7 +319,7 @@
                                         <tr>
                                             <th scope="col">Type</th>
                                             <th scope="col">Date</th>
-                                            <th scope="col">Quantity</th>
+                                            <th scope="col">Quantité</th>
                                             <th scope="col">Restant</th>
                                             <th scope="col"></th>   
                                         </tr>    
@@ -304,191 +333,303 @@
                     </div>
                 </div>
             `;
-        }
+    }
 
-        var subtable;
+    var subtable;
 
-        // Add event listener for opening and closing details
-        $('#product-table tbody').on('click', 'td.details-control', async function () {
-            var tr = $(this).closest('tr');
-            var row = table.row(tr);
+    // Add event listener for opening and closing details
+    $('#product-table tbody').on('click', 'td.details-control', async function () {
+        var tr = $(this).closest('tr');
+        var row = table.row(tr);
 
-            if (row.child.isShown()) {
-                // This row is already open - close it
-                row.child.hide();
-                tr.removeClass('shown');
-            } else {
-                // Open this row
-                row.child(await format(row.data())).show();
-                row.child().addClass('non-hoverable');
-                tr.addClass('shown');
-                // product id
-                let id = row.data()._id;
-                // init datatable
-                subtable = $(`#actions-${id}`).DataTable({
-                    ...dt_lang,
-                    searching: false,   // Disable search
-                    ordering: false,    // Disable sorting
-                    paging: false,       // Disable pagination
-                    info: false,
-                    columnDefs: [
-                        {
-                            targets: [2, 3],
-                            className: 'dt-body-center'
-                        },
-                        {
-                            targets: 1,
-                            render: DataTable.render.datetime('DD/MM/YYYY'),
-                        },
-                        {
-                            targets: 0,  // Replace with the correct target column index
-                            createdCell: function(td, cellData, rowData, row, col) {
-                                $(td).closest('tr').addClass(cellData.type);
-                            }
+        if (row.child.isShown()) {
+            // This row is already open - close it
+            row.child.hide();
+            tr.removeClass('shown');
+        } else {
+            // Open this row
+            row.child(await format(row.data())).show();
+            row.child().addClass('non-hoverable');
+            tr.addClass('shown');
+            // product id
+            let id = row.data()._id;
+            // init datatable
+            subtable = $(`#actions-${id}`).DataTable({
+                ...dt_lang,
+                searching: false,   // Disable search
+                ordering: false,    // Disable sorting
+                paging: false,       // Disable pagination
+                info: false,
+                columnDefs: [
+                    {
+                        targets: 0,
+                        createdCell: function (td, cellData, rowData, row, col) {
+                            // Adding a data attribute to the cell
+                            $(td).attr('td-name', 'type');
+                            $(td).attr('type', 'select');
+                            $(td).attr('value', cellData.type);
                         }
-                    ],
-                    ajax: {
-                        url: `/api/product/actions/recents/${id}`,
-                        dataSrc: 'data'
                     },
-                    columns: [
-                        {
-                            data: null,
-                            render: (_, __, row) => {
-                                return row.type === "entry" ? `<span>Entrée</span>` : `<span>Sortie</span>`
-                            }
-                        },
-                        { data: 'date' },
-                        { data: 'quantity' },
-                        { data: 'remaining' },
-                        {
-                            data: null,
-                            render: (_, __, row, table) => {
-                                return (table.row === 0) ?
+                    {
+                        targets: 1,
+                        createdCell: function (td, cellData, rowData, row, col) {
+                            // Adding a data attribute to the cell
+                            $(td).attr('td-name', 'date');
+                            $(td).attr('type', 'date');
+                            $(td).attr('date-value', cellData.split('T')[0]);
+                        }
+                    },
+                    {
+                        targets: 2,
+                        createdCell: function (td, cellData, rowData, row, col) {
+                            // Adding a data attribute to the cell
+                            $(td).attr('td-name', 'quantity');
+                            $(td).attr('type', 'number');
+                        }
+                    },
+                    {
+                        targets: [2, 3],
+                        className: 'dt-body-center'
+                    },
+                    {
+                        targets: 1,
+                        render: DataTable.render.datetime('DD/MM/YYYY'),
+                    },
+                    {
+                        targets: 0,  // Replace with the correct target column index
+                        createdCell: function (td, cellData, rowData, row, col) {
+                            $(td).closest('tr').addClass(cellData.type);
+                        }
+                    }
+                ],
+                ajax: {
+                    url: `/api/product/actions/recents/${id}`,
+                    dataSrc: 'data'
+                },
+                columns: [
+                    {
+                        data: null,
+                        render: (_, __, row) => {
+                            return row.type === "entry" ? `<span>Entrée</span>` : `<span>Sortie</span>`
+                        }
+                    },
+                    { data: 'date' },
+                    { data: 'quantity' },
+                    { data: 'remaining' },
+                    {
+                        data: null,
+                        render: (_, __, row, table) => {
+                            return (table.row >= 0) ?
                                 `<div class="d-flex" style="gap: 8px;">
-                                    <button class="btn btn-dark btn-sm" onclick="cancelAction('${row._id}', '${row.type}')">
-                                        <i class="fas fa-times"></i> Annuler
+                                    <button class="btn btn-outline-dark btn-sm mr-3 edit-btn" onclick="cancelAction('${row._id}', '${row.type}', '${row.quantity}')">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm edit-btn" onclick="editRowAction('${row._id}', '${row.type}')">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+
+                                    <button class="btn btn-outline-success btn-sm mr-3 save-btn" onclick="handleSaveRowAction('${row._id}')">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm cancel-btn" onclick="handleCancelAction()"
+                                        data-bs-toggle="modal" data-bs-target="#cancel-modal"
+                                    >
+                                        <i class="fas fa-arrow-left"></i>
                                     </button>
                                 </div>` : ''
-                            }
-                        },
-                    ]
-                });
-                
-                // whenever subtable is reloading
-                subtable.on('draw', () => {
-                    $('#actions-count').text(subtable.rows().count());
-                });
-
-            }
-        });
-
-        // method to enter or exit product
-        async function handleAction(productId) {
-            event.preventDefault();
-
-            let btn = $(document.activeElement);
-            let inputDate = $(`#date-${productId}`);
-            let input = $(`#qty-${productId}`);
-
-            let actionType = btn.attr('title');
-
-            if (!['entry', 'exit'].includes(actionType)) {
-                return alert('no action')
-            }
-
-            // // send request
-            const res = await axios.post(`/api/product/action`, {
-                productId: productId,
-                date: inputDate.val(),
-                quantity: actionType === 'entry' ? +input.val() : -input.val()
+                        }
+                    },
+                ]
             });
 
-            const {ok, product, action, message} = res.data;
-            
-            if (res.data.ok) {
-                const tr = btn.closest('tr').prev();
-                const row = table.row(tr);
-                row.data(product).draw();
-                input.val('0');
-                // refresh subtable
-                subtable.ajax.reload();
-                // 
-                Alert(`Vous avez ${action === 'entry' ? 'entré' : 'sorti'} ${action.quantity} unités du produit: ${product.name}.`);
-            } else {
-                Error(message);
-            }
+            // whenever subtable is reloading
+            subtable.on('draw', () => {
+                $('#actions-count').text(subtable.rows().count());
+            });
+
+        }
+    });
+
+    // method to update action
+    async function handleSaveRowAction(actionId) {
+        const $tr = $(document.activeElement).closest('tr');
+
+
+        let qtyInput = $tr.find('input[type="number"]');
+        let dateInput = $tr.find('input[type="date"]');
+        let typeInput = $tr.find(`select#${actionId}`);
+
+        if (new Date(dateInput.val()) === 'Invalid Date') {
+            return Error('Veuillez remplir la date correctement!')
+        }
+
+        // post to server
+        const res = await axios.put(`/api/product/action/${actionId}`, {
+            date: dateInput.val(),
+            quantity: typeInput.val() === 'entry' ? +qtyInput.val() : -qtyInput.val(),
+            action: typeInput.val()
+        });
+
+        const { ok, product, message } = res.data;
+
+        if (ok) {
+            subtable.ajax.reload();
+            Alert('Modification de transactions en success')
+            // reload parent table row
+            let $table = $tr.closest('table');
+            const tr = $table.closest('tr').prev();
+            const row = table.row(tr);
+            row.data(product).draw();
+        } else {
+            Error(message);
         }
 
 
-        // handle submit form (add product)
-        $('#add-product-form').on('submit', async function(e) {
-            e.preventDefault();
+    }
 
-            var formArray = $(this).serializeArray();
-            console.log(formArray)
-            var formData = {};
+    function handleCancelAction() {
+        if (subtable) {
+            subtable.ajax.reload();
+        }
+    }
 
-            $.each(formArray, function(_, field) {
-                formData[field.name] = field.value;
-            });
 
-            // send request (POST)
-            const res = await axios.post('/api/product/create', {
-                ...formData
-            });
-
-            const {ok, data, message} = res.data;
-
-            if (ok) {
-                // populate the new product into the table
-                table.row.add(data).draw();
-                // reset form
-                $(this).trigger('reset');
-                // success
-                Alert('Un produit a été ajouté!');
-            } else {
-                Error(message)
+    // edit row
+    function editRowAction(productId) {
+        var $row = $(document.activeElement).closest('tr');
+        $row.find('td').not(':last').each(function () {
+            var $cell = $(this);
+            var type = $cell.attr('type');
+            var name = $cell.attr('td-name');
+            var text = type === 'date' ? $cell.attr('date-value') : $cell.text();
+            var _value = $cell.attr('value')
+            if (['date', 'quantity'].includes(name))
+                $cell.html(`<input name="${name}" type="${type}" class="form-control" value="${text}"/>`);
+            else if (['type'].includes(name)) {
+                console.log('t')
+                $cell.html(`<select id="${productId}" name="${name}" class="form-select">
+                        <option value="entry" ${_value === 'entry' ? 'selected' : ''}>Entrée</option>
+                        <option value="exit" ${_value === 'exit' ? 'selected' : ''}>Sortie</option>
+                    </select>`);
             }
         });
+        $row.addClass('as-form');
+    }
 
-        
-        // handle submit form (add product)
-        $('#add-group-form').on('submit', async function(e) {
-            e.preventDefault();
+    // method to enter or exit product
+    async function handleAction(productId) {
+        event.preventDefault();
 
-            var formArray = $(this).serializeArray();
-            console.log(formArray)
-            var formData = {};
+        let btn = $(document.activeElement);
+        let inputDate = $(`#date-${productId}`);
+        let input = $(`#qty-${productId}`);
 
-            $.each(formArray, function(_, field) {
-                formData[field.name] = field.value;
-            });
+        let actionType = btn.attr('title');
 
-            // send request (POST)
-            const res = await axios.post('/api/product/groups/all', {
-                ...formData
-            });
+        if (!['entry', 'exit'].includes(actionType)) {
+            return alert('no action')
+        }
 
-            const {ok, data, message} = res.data;
-
-            if (ok) {
-                // populate the new product to the list
-                // reset form
-                $(this).trigger('reset');
-                // success
-                Alert('Un group de produit a été crée!');
-            } else {
-                Error(message)
-            }
+        // // send request
+        const res = await axios.post(`/api/product/action`, {
+            productId: productId,
+            date: inputDate.val(),
+            quantity: actionType === 'entry' ? +input.val() : -input.val()
         });
 
-        // method to cancel actions
-        async function cancelAction(actionId, type = 'entry') {
+        const { ok, product, action, message } = res.data;
 
-            let $tr = $(document.activeElement).closest('tr');
-            let $row = $tr.closest('table').closest('tr').prev(('tr'))
+        if (res.data.ok) {
+            const tr = btn.closest('tr').prev();
+            const row = table.row(tr);
+            row.data(product).draw();
+            input.val('0');
+            // refresh subtable
+            subtable.ajax.reload();
+            // 
+            Alert(`Vous avez ${action === 'entry' ? 'entré' : 'sorti'} ${action.quantity} unités du produit: ${product.name}.`);
+        } else {
+            Error(message);
+        }
+    }
 
+
+    // handle submit form (add product)
+    $('#add-product-form').on('submit', async function (e) {
+        e.preventDefault();
+
+        var formArray = $(this).serializeArray();
+        console.log(formArray)
+        var formData = {};
+
+        $.each(formArray, function (_, field) {
+            formData[field.name] = field.value;
+        });
+
+        // send request (POST)
+        const res = await axios.post('/api/product/create', {
+            ...formData
+        });
+
+        const { ok, data, message } = res.data;
+
+        if (ok) {
+            // populate the new product into the table
+            table.row.add(data).draw();
+            // reset form
+            $(this).trigger('reset');
+            // success
+            Alert('Un produit a été ajouté!');
+        } else {
+            Error(message)
+        }
+    });
+
+
+    // handle submit form (add product)
+    $('#add-group-form').on('submit', async function (e) {
+        e.preventDefault();
+
+        var formArray = $(this).serializeArray();
+        console.log(formArray)
+        var formData = {};
+
+        $.each(formArray, function (_, field) {
+            formData[field.name] = field.value;
+        });
+
+        // send request (POST)
+        const res = await axios.post('/api/product/groups/all', {
+            ...formData
+        });
+
+        const { ok, data, message } = res.data;
+
+        if (ok) {
+            // populate the new product to the list
+            // reset form
+            $(this).trigger('reset');
+            // success
+            Alert('Un group de produit a été crée!');
+        } else {
+            Error(message)
+        }
+    });
+
+    // method to cancel actions
+    async function cancelAction(actionId, type = 'entry', qty) {
+
+        let $tr = $(document.activeElement).closest('tr');
+        let $row = $tr.closest('table').closest('tr').prev(('tr'))
+
+        // open modal 
+        $('#m-action-type').text(type === 'entry' ? "l'entrée" : "la sortie");
+        $('#m-action-qty').text(qty);
+
+        $('#open-cancel-modal').click();
+
+        // add event listener on confirm button
+        $('#confirm-btn').on('click', async () => {
             let formData = { actionId };
             const res = await axios.post(`/api/product/action/cancel`, formData);
 
@@ -503,31 +644,35 @@
                 subtable.ajax.reload();
                 // show success
                 Alert('Une transaction a été annulée.');
+                // close modal
+                $('#open-cancel-modal').click();
 
             } else {
                 Error(message)
             }
 
+        })
+
+    }
+
+    // method to get groups
+    async function getProductGroups() {
+        const res = await axios.get('/api/product/groups/all');
+
+        const { ok, data, message } = res.data;
+
+        if (ok) {
+            return data;
+        } else {
+            Error(message)
+            return [];
         }
+    }
 
-        // method to get groups
-        async function getProductGroups() {
-            const res = await axios.get('/api/product/groups/all');
-
-            const {ok, data, message} = res.data;
-
-            if (ok) {
-                return data;
-            } else {
-                Error(message)
-                return [];
-            }
-        }
-
-        // before opening new product form
-        $('.accordion-button').on('click', async function() {
-            const groups = await getProductGroups();
-            const groupsOptions = groups.map(g => `<option value="${g._id}">${g.name}</option>`).join('');
-            $('#product-groups').html(groupsOptions)
-        });
-    </script>
+    // before opening new product form
+    $('.accordion-button').on('click', async function () {
+        const groups = await getProductGroups();
+        const groupsOptions = groups.map(g => `<option value="${g._id}">${g.name}</option>`).join('');
+        $('#product-groups').html(groupsOptions)
+    });
+</script>

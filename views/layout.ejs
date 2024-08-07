@@ -39,10 +39,11 @@
             background-color: #CDE7FC !important;
             cursor: default;
         }
-        tr.as-form .edit-btn, .save-btn {
+        tr.as-form .edit-btn, .save-btn, .cancel-btn {
             display: none;
         }
-        tr.as-form .save-btn {
+        tr.as-form .save-btn,
+        tr.as-form .cancel-btn {
             display: block;
         }
         tbody td.centered-cell div {
@@ -132,6 +133,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/product/stocks-calendar">Calendrier de stocks</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/product/story">Historiques</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -174,7 +178,6 @@
 
         
         function Error(message) {
-            
             Toastify({
                 text: message,
                 duration: 8000,
@@ -189,6 +192,21 @@
                 },
                 onClick: function(){} // Callback after click
             }).showToast();
+        }
+
+        
+        function generateColorFromId(str) {
+                
+            let hash = 0;
+            str.split('').forEach(char => {
+                hash = char.charCodeAt(0) + ((hash << 5) - hash)
+            })
+            let colour = '#'
+            for (let i = 0; i < 3; i++) {
+                const value = (hash >> (i * 8)) & 0xff
+                colour += value.toString(16).padStart(2, '0')
+            }
+            return colour
         }
     </script>
 </body>

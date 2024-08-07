@@ -1,11 +1,328 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
-</html>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-bundle.min.js"></script>
+    <style>
+        
+        #historicalChart {
+            width: 100%;
+            height: 500px;
+        }
+        .card-title {
+            color: #7C868E;
+            font-size: 18px;
+        }
+
+        table tr *, ul li:not(.visitor-item) {
+            font-size: 14px;
+            /* padding: 0.2rem; */
+        }
+
+        .bg-yellow {
+            color: #000;
+            background-color: #FEF6D5;
+        }
+
+        div.visitor {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: .2rem;
+            position: relative;
+        }
+        div.visitor:hover {
+            background-color: #f5f5f5;
+        }
+        div.visitor .profile {
+            background-color: #A6D04E;
+            border-radius: 50%;
+            height: 55px;
+            aspect-ratio: 1;
+            color: black;
+            font-weight: 600;
+            font-size: 20px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        div.visitor .infos {
+            display: flex;
+            flex-direction: column;
+        }
+        div.visitor .infos small {
+            color: #7C868E;
+        }
+        div.visitor .infos .time {
+            position: absolute;
+            font-size: 12px;
+            right: 0;
+            top: 5px;
+            color: #7C868E;
+        }
+        div.visitors-list {
+            overflow-y: auto;
+            max-height: 262px;
+        }
+        .anychart-credits {
+            display: none;
+        }
+    </style>
+
+    <div class="container-fluid mt-5">
+        <!-- <h1 class="text-center">Tableau de bord</h1> -->
+
+        <!-- Stock Levels Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Niveaux Actuels des Stocks</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantité</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-levels">
+                                <!-- Data will be inserted here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Low Stock Alerts Section -->
+            <div class="col-md-4">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Alertes de Stock Faible</h5>
+                        <ul id="low-stock-alerts" class="list-group bg-warning text-white">
+                            <!-- Data will be inserted here by JavaScript -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Last visitor on the website -->
+            <div class="col-md-4">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Dérniers visiteurs du site</h5>
+                        <div class="visitors-list">
+                            <ul class="list-group">
+                                <li class="list-group-item visitor-item">
+                                    <div class="visitor">
+                                        <div class="profile">
+                                            <span>NJ</span>
+                                        </div>
+                                        <div class="infos">
+                                            <span>Njato</span>
+                                            <small>njatotianafiononana@gmail.com</small>
+                                            <span class="time">Il y a 1 jours</span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item visitor-item">
+                                    <div class="visitor">
+                                        <div class="profile">
+                                            <span>NJ</span>
+                                        </div>
+                                        <div class="infos">
+                                            <span>Njato</span>
+                                            <small>njatotianafiononana@gmail.com</small>
+                                            <span class="time">Il y a 1 jours</span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item visitor-item">
+                                    <div class="visitor">
+                                        <div class="profile">
+                                            <span>NJ</span>
+                                        </div>
+                                        <div class="infos">
+                                            <span>Njato</span>
+                                            <small>njatotianafiononana@gmail.com</small>
+                                            <span class="time">Il y a 1 jours</span>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions Section -->
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Transactions Récentes</h5>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                    <th>Quantité</th>
+                                    <th>Fait par</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-transactions">
+                                <!-- Data will be inserted here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historical Trends Section -->
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Entrées et Sorties de Stock par Produit au Fil du Temps</h5>
+                        <div id="historicalChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.2/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment-with-locales.min.js"></script>
+    <script>
+
+        moment.locale('fr');
+
+        // Function to generate color from ObjectId
+        function generateColorFromString(str) {
+            let hash = 0;
+            str.split('').forEach(char => {
+                hash = char.charCodeAt(0) + ((hash << 5) - hash)
+            })
+            let colour = '#'
+            for (let i = 0; i < 3; i++) {
+                const value = (hash >> (i * 8)) & 0xff
+                colour += value.toString(16).padStart(2, '0')
+            }
+            return colour
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+
+            const res = await axios.get('http://localhost:3000/api/product');
+
+            const { ok, data: stockLevels } = res.data;
+            // Sample data for stock levels, low stock alerts, and recent transactions
+
+
+            const recentRes = await axios.get('http://localhost:3000/api/product/actions/recents?limit=5');
+            const { data: recentTransactions } = recentRes.data;
+
+            // Historical trends
+            const hisRes = await axios.get('http://localhost:3000/api/product/actions/historical-trends');
+            const { data: historiCalData } = hisRes.data;
+
+
+            // Populate stock levels table
+            const stockLevelsTable = document.getElementById('stock-levels');
+            stockLevels.forEach(stock => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${stock.name}</td><td>${stock.quantityAvailable}</td>`;
+                stockLevelsTable.appendChild(row);
+            });
+
+            // Populate low stock alerts
+            const lowStockAlerts = document.getElementById('low-stock-alerts');
+            stockLevels.filter(stock => stock.quantityAvailable < 10).forEach(stock => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('list-group-item', 'bg-yellow');
+                listItem.innerHTML = `<b>${stock.name}</b> est presque épuisé: ${stock.quantityAvailable} restant`;
+                lowStockAlerts.appendChild(listItem);
+            });
+
+            // Populate recent transactions table
+            const recentTransactionsTable = document.getElementById('recent-transactions');
+            recentTransactions.forEach(transaction => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${moment(transaction.date).format('DD/MM/YYYY')}, ${moment(transaction.date).locale('fr').fromNow()}</td>
+                <td>${transaction.type === 'entry' ? '<i class="fas fa-arrow-down text-success mr-2"></i> Entrée' : '<i class="fas fa-arrow-up text-danger mr-2"></i> Sortie'}</td>
+                <td>${transaction.quantity}</td>
+                <td>un Utilisateur</td>`;
+                recentTransactionsTable.appendChild(row);
+            });
+
+        });
+
+        anychart.onDocumentReady(async function() {
+            const hisRes = await axios.get('http://localhost:3000/api/product/actions/historical-trends');
+            const { data } = hisRes.data;
+
+            // Transform data to a format suitable for a stacked column chart
+            var transformedData = [];
+
+            data.forEach(day => {
+                day.products.forEach(product => {
+                    var entry = product.type === 'entry' ? product.quantity : 0;
+                    var exit = product.type === 'exit' ? Math.abs(product.quantity) : 0;
+                    transformedData.push({
+                        x: day._id + ' - ' + product.product,
+                        entry: entry,
+                        exit: exit
+                    });
+                });
+            });
+
+            // Create a stacked column chart
+            var chart = anychart.column();
+
+            // Create an entry series and set the data
+            var entrySeries = chart.column(transformedData.map(item => ({ x: item.x, value: item.entry })));
+            entrySeries.name('Entrée');
+            entrySeries.color('#00cc99');
+
+            // Create an exit series and set the data
+            var exitSeries = chart.column(transformedData.map(item => ({ x: item.x, value: item.exit })));
+            exitSeries.name('Sortie');
+            exitSeries.color('#ff6666');
+
+            // Set the chart title
+            chart.title('Diagramme');
+
+            // Customize axes
+            chart.xAxis().title('Date et Produit');
+            chart.yAxis().title('Quantité');
+
+            // Customize tooltips
+            entrySeries.tooltip().titleFormat('Entrée');
+            entrySeries.tooltip().format('Quantité: {%value}');
+            exitSeries.tooltip().titleFormat('Sortie');
+            exitSeries.tooltip().format('Quantité: {%value}');
+
+            // Add grid lines for better readability
+            chart.xGrid(true);
+            chart.yGrid(true);
+
+            // Customize the legend
+            chart.legend().enabled(true);
+            chart.legend().fontSize(13);
+            chart.legend().padding(0, 0, 20, 0);
+
+            // Enable the legend
+            chart.legend(true);
+
+            // Set the container id
+            chart.container('historicalChart');
+
+            // Draw the chart
+            chart.draw();
+        });
+    </script>
